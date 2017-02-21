@@ -1,1 +1,1 @@
-# bountee_plugin
+# bounteePlugin

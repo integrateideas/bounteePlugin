@@ -1,6 +1,6 @@
 {
-    "name": "integrateideas/bounteeplugin",
-    "description": "Integrateideas/BounteePlugin plugin for CakePHP",`
+    "name": "integrateideas/bounteePlugin",
+    "description": "Integrateideas/BounteePlugin plugin for CakePHP",
     "version":"0.0.1",
     "type": "cakephp-plugin",
     "require": {

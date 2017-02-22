@@ -1,0 +1,38 @@
+{
+    "name": "integrateideas/bounteePlugin",
+    "description": "Integrateideas/BounteePlugin plugin for CakePHP",
+    "type": "cakephp-plugin",
+    "require": {
+        "php": ">=5.5.9",
+        "cakephp/cakephp": ">=3.3.2 <4.0.0"
+    },
+    "homepage": "https://github.com/integrateideas/bounteePlugin",
+    "authors": [
+        {
+            "name":"Integrateideas",
+            "role":"Author",
+            "homepage":"https://github.com/integrateideas"
+        }
+    ],
+    "license": "MIT",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/integrateideas/bounteePlugin"
+        } 
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Integrateideas\\BounteePlugin\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Integrateideas\\BounteePlugin\\Test\\": "tests",
+            "Cake\\Test\\": "./vendor/cakephp/cakephp/tests"
+        }
+    }
+}

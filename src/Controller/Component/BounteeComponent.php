@@ -20,26 +20,28 @@ class BounteeComponent extends Component{
     //index is for activities
     private $_resourcesWithIdentifier = [                        
                                             'get'=>[
-                                            'reseller'=>['vendors'],
-                                            'user' => ['me', 'activities', 'user-cards'],
-                                            'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions']
-                                            ],
+                                                'reseller'=>['vendors'],
+                                                'user' => ['me', 'activities', 'user-cards'],
+                                                'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions']
+                                                ],
                                             'put'=>[
-                                            'reseller'=>['vendors'],
-                                            'user' => ['switch_account', 'users'],
-                                            'vendor'=>['users', 'vendors']
-                                            ],
+                                                'reseller'=>['vendors'],
+                                                'user' => ['switch_account', 'users'],
+                                                'vendor'=>['users', 'vendors']
+                                                ],
                                             'delete'=>[
-                                            'reseller'=>['vendors'],
-                                            'vendor'=>[]
-                                            ]
-                                            ];
+                                                'reseller'=>['vendors'],
+                                                'vendor'=>[]
+                                                ]
+                                        ];
     private $_resourcesWithoutIdentifier = [                        
                                             'post'=>[
-                                            'reseller'=>['token', 'vendors'],
-                                            'user' => ['login', 'register', 'logout', 'user-cards', 'forget_password', 'redeemedCredits', 'reset_password']
-                                            ],
-                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username']
+                                                    'reseller'=>['token', 'vendors'],
+
+                                                    'user' => ['login', 'register', 'logout', 'user-cards', 'forget_password', 'redeemedCredits', 'reset_password'],
+
+                                                    'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username']
+                                                ]
                                            ];
 
     /*private $_resourcesPost = [

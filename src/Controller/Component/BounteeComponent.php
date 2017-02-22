@@ -13,18 +13,38 @@ use Cake\Log\Log;
  */
 class BounteeComponent extends Component{
 
-    const BOUNTEE_URL = "http://peoplehub.twinspark.co/peoplehub";
-  
+    const BOUNTEE_URL = "http://peoplehub.twinspark.co/peoplehub/api";
+
     private $_endpoint = '';
 
     //index is for activities
-    private $_resources = [
-                            'users' => ['me']
-                          ];
+    private $_resourcesWithIdentifier = [                        
+                                            'get'=>[
+                                            'reseller'=>['vendors'],
+                                            'user' => ['me', 'activities', 'user-cards'],
+                                            'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions']
+                                            ],
+                                            'put'=>[
+                                            'reseller'=>['vendors'],
+                                            'user' => ['switch_account', 'users'],
+                                            'vendor'=>['users', 'vendors']
+                                            ],
+                                            'delete'=>[
+                                            'reseller'=>['vendors'],
+                                            'vendor'=>[]
+                                            ]
+                                            ];
+    private $_resourcesWithoutIdentifier = [                        
+                                            'post'=>[
+                                            'reseller'=>['token', 'vendors'],
+                                            'user' => ['login', 'register', 'logout', 'user-cards', 'forget_password', 'redeemedCredits', 'reset_password']
+                                            ],
+                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username']
+                                           ];
 
     /*private $_resourcesPost = [
-                                'users' => ['register']
-                              ];*/
+    'users' => ['register']
+    ];*/
 
     public function initialize(array $config)
     {
@@ -32,40 +52,10 @@ class BounteeComponent extends Component{
     }
 
 
-    private function _createUrl($resource, $id = false)
+    private function _createUrl($_resourcesWithIdentifier, $_resourcesWithoutIdentifier, $id = false, $subResource)
     {
-        return $this->_endpoint . (($id) ? $resource."/".$id."/" : $resource);
+        return $this->_endpoint . ($_resourcesWithIdentifier."/".$subResource."/".($id) ? $_resourcesWithIdentifier."/".$subResource."/".$id  : $_resourcesWithoutIdentifier."/".$subResource);
     }
 
 
-    public function fetchData($token, $resource, $id = false)
-    {
-
-        if (!$token || !$resource || !array_key_exists($resource, $this->_resources)) {
-            throw new Exception(__("Resource Name or Token is missing or mispelled. The available options are ".implode(", ", array_keys($this->_resources))));
-        }
-          
-        $url = $this->_createUrl($resource, $id);
-        return $this->_fetchResponseData($url, $token);
-    }
-
-
-    private function _fetchResponseData($url, $token)
-    {
-        $http = new Client();
-        $response = $http->get($url, [], [
-        'headers' => ['Authorization' => 'Bearer '.$token]
-        ]);
-
-        if ($response->code != '200') {
-            $errorCall = new AppError();
-            //error call here
-            $errorCall->_displayError($response->body);
-
-            return false;
-        }
-
-        return json_decode($response->body);
-    }
-   
 }

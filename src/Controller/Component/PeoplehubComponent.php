@@ -85,8 +85,7 @@ class PeoplehubComponent extends Component
         return $this->_endpoint . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);
     }
 
-    private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=false,$headerData=false,$payload=false)
-    {
+    private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=false,$headerData=false,$payload=false){
         $httpMethod = strtolower($httpMethod);
         $http = new Client();
         $url = $this->_createUrl($resource, $subResource, $subResourceId = false);
@@ -133,7 +132,11 @@ class PeoplehubComponent extends Component
                     $this->_session->write('t', $response->data);
                     $token = $response->data->token;
                 }else{
-                    Log::write('debug', 'Unable get '.$resource.' token');
+                    $err =array();
+                    $err['status']=false;
+                    $err['data']['message']='Unable to get '.$resource.' token.';
+                    $err['data']['data']=json_decode($response->body());
+                    return $err;
                 }
             }
         }else{
@@ -147,13 +150,13 @@ class PeoplehubComponent extends Component
     {
             //call renewToken function
         if($resource == 'user'){
-            $token = $this->_getToken('post','user','login',$subResourceId=false, false);   
+         $token = $this->_getToken('post','user','login',$subResourceId=false, false);   
         }else if($resource == 'reseller'){
             $token = $this->_getToken('post','reseller','token',$subResourceId=false, false);
         }else if($resource == 'vendor'){
             $token = $this->_getToken('post','vendor','token',$subResourceId=false,['vendor_id' => $vendorId]);
         }else{
-            Log::write('debug', 'Resource name is missing or mispelled');
+            throw new Exception("Resource name is mispelled or not found");
         }
         $httpMethod = strtolower($httpMethod);
         $http = new Client();

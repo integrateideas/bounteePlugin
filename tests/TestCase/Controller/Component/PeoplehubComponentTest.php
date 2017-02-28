@@ -1,22 +1,22 @@
 <?php
-namespace Integrateideas\BounteePlugin\Test\TestCase\Controller\Component;
+namespace Integrateideas\Peoplehub\Test\TestCase\Controller\Component;
 
 use Cake\Controller\ComponentRegistry;
 use Cake\TestSuite\TestCase;
-use Integrateideas\BounteePlugin\Controller\Component\BounteeComponent;
+use Integrateideas\Peoplehub\Controller\Component\PeoplehubComponent;
 
 /**
- * Integrateideas\BounteePlugin\Controller\Component\BounteeComponent Test Case
+ * Integrateideas\Peoplehub\Controller\Component\PeoplehubComponent Test Case
  */
-class BounteeComponentTest extends TestCase
+class PeoplehubComponentTest extends TestCase
 {
 
     /**
      * Test subject
      *
-     * @var \Integrateideas\BounteePlugin\Controller\Component\BounteeComponent
+     * @var \Integrateideas\Peoplehub\Controller\Component\PeoplehubComponent
      */
-    public $Bountee;
+    public $Peoplehub;
 
     /**
      * setUp method
@@ -27,7 +27,7 @@ class BounteeComponentTest extends TestCase
     {
         parent::setUp();
         $registry = new ComponentRegistry();
-        $this->Bountee = new BounteeComponent($registry);
+        $this->Peoplehub = new PeoplehubComponent($registry);
     }
 
     /**
@@ -37,7 +37,7 @@ class BounteeComponentTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->Bountee);
+        unset($this->Peoplehub);
 
         parent::tearDown();
     }

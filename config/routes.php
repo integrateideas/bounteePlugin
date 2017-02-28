@@ -4,8 +4,8 @@ use Cake\Routing\Router;
 use Cake\Routing\Route\DashedRoute;
 
 Router::plugin(
-    'Integrateideas/BounteePlugin',
-    ['path' => '/integrateideas/bountee-plugin'],
+    'Integrateideas/Peoplehub',
+    ['path' => '/integrateideas/peoplehub'],
     function (RouteBuilder $routes) {
         $routes->fallbacks(DashedRoute::class);
     }

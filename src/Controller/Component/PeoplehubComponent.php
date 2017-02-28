@@ -60,10 +60,10 @@ class PeoplehubComponent extends Component
                                             ];
 
     private function _validateResourceAndSubResource($httpMethod,$identifier,$resource,$subResource){
-            if(!empty($resource) && !array_key_exists($resource, $this->$identifier[$httpMethod])){
-                throw new Exception(__("Resource Name is missing or mispelled. The available options are ".implode(", ", array_keys($this->$identifier[$httpMethod]))));
-          }
-          if (!empty($subResource) && !in_array($subResource, $this->$identifier[$httpMethod][$resource])) {
+        if(!empty($resource) && !array_key_exists($resource, $this->$identifier[$httpMethod])){
+            throw new Exception(__("Resource Name is missing or mispelled. The available options are ".implode(", ", array_keys($this->$identifier[$httpMethod]))));
+        }
+        if (!empty($subResource) && !in_array($subResource, $this->$identifier[$httpMethod][$resource])) {
             throw new Exception(__("Incorrect Subresource provided or mispelled. The available options for ".$resource." are ".implode(", ", $this->$identifier[$httpMethod][$resource])));
         }  
     }
@@ -89,7 +89,6 @@ class PeoplehubComponent extends Component
         $httpMethod = strtolower($httpMethod);
         $http = new Client();
         $url = $this->_createUrl($resource, $subResource, $subResourceId = false);
-        // pr($url); die;
         if($resource == 'reseller' && $subResource == 'token'){
             $response = $http->$httpMethod($url, [], [
                 'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret)]
@@ -108,8 +107,8 @@ class PeoplehubComponent extends Component
 
     }
 
-    private function _getToken($httpMethod,$resource,$subResource,$subResourceId=false,$payload=false)
-    {   
+    private function _getToken($httpMethod,$resource,$subResource,$subResourceId=false,$payload=false){
+        
         $this->_validateInfo($httpMethod,$resource,$subResource);
         $readToken = $this->_session->read('t');
         $isRenewRequired = false;
@@ -148,31 +147,29 @@ class PeoplehubComponent extends Component
 
     public function requestData($httpMethod,$resource, $subResource, $subResourceId = false, $headerData = false, $payload=false,$vendorId = null)
     {
-            //call renewToken function
+        //call renewToken function
         if($resource == 'user'){
-         $token = $this->_getToken('post','user','login',$subResourceId=false, false);   
-        }else if($resource == 'reseller'){
-            $token = $this->_getToken('post','reseller','token',$subResourceId=false, false);
-        }else if($resource == 'vendor'){
-            $token = $this->_getToken('post','vendor','token',$subResourceId=false,['vendor_id' => $vendorId]);
-        }else{
-            throw new Exception("Resource name is mispelled or not found");
-        }
-        $httpMethod = strtolower($httpMethod);
-        $http = new Client();
-        $this->_validateInfo($httpMethod,$resource,$subResource);
-        $url = $this->_createUrl($resource, $subResource, $subResourceId = false);
-        if($httpMethod == 'get'){
-            if($payload){
-                   $newurl = $url.'?'.http_build_query($payload);                 
-               }else{
-                   $newurl = $url;
-               }
-               // pr($newurl); die;
-        $response = $http->$httpMethod($newurl, [], [
-                'headers' => ['Authorization' => $token]]);
-        // pr($response); die;
-       }else{
+           $token = $this->_getToken('post','user','login');   
+       }else if($resource == 'reseller'){
+        $token = $this->_getToken('post','reseller','token');
+    }else if($resource == 'vendor'){
+        $token = $this->_getToken('post','vendor','token',false,['vendor_id' => $vendorId]);
+    }else{
+        throw new Exception("Resource name is mispelled or not found");
+        
+    }
+    $httpMethod = strtolower($httpMethod);
+    $http = new Client();
+    $url = $this->_createUrl($resource, $subResource, $subResourceId);
+    if($httpMethod == 'get'){
+        if($payload){
+         $newurl = $url.'?'.http_build_query($payload);                 
+     }else{
+         $newurl = $url;
+     }
+     $response = $http->$httpMethod($newurl, [], [
+        'headers' => ['Authorization' => $token]]);
+     }else{
         $response = $http->$httpMethod($url, json_encode($payload), [
             'headers' => ['Authorization' => $token]]);
     }

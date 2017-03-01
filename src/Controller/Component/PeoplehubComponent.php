@@ -29,7 +29,7 @@ class PeoplehubComponent extends Component
         $this->_clientId = $config['clientId'];
         $this->_clientSecret = $config['clientSecret'];
         $this->_userType = $config['userType'];
-        $this->_endpoint = self::BOUNTEE_URL."/";
+        $this->_endpoint = self::PEOPLEHUB_URL."/";
         $this->_session = new Session();
     }
 

@@ -4,7 +4,7 @@ namespace Integrateideas\Peoplehub\Model\Entity;
 use Cake\ORM\Entity;
 
 /**
- * User Entity
+ * PeoplehubUser Entity
  *
  * @property int $id
  * @property int $user_id
@@ -12,10 +12,10 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\Time $created
  * @property \Cake\I18n\Time $modified
  *
- * @property \Integrateideas\Peoplehub\Model\Entity\User[] $users
- * @property \Integrateideas\Peoplehub\Model\Entity\PeoplehubUser $peoplehub_user
+ * @property \Integrateideas\Peoplehub\Model\Entity\User $user
+ * @property \Integrateideas\Peoplehub\Model\Entity\PeoplehubUser[] $peoplehub_users
  */
-class User extends Entity
+class PeoplehubUser extends Entity
 {
 
     /**

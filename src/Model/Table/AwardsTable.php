@@ -35,9 +35,9 @@ class AwardsTable extends Table
     {
         parent::initialize($config);
 
-        $this->setTable('awards');
-        $this->setDisplayField('id');
-        $this->setPrimaryKey('id');
+        $this->table('awards');
+        $this->displayField('id');
+        $this->primaryKey('id');
 
         $this->addBehavior('Timestamp');
 

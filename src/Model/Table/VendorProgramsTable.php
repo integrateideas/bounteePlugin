@@ -35,9 +35,9 @@ class VendorProgramsTable extends Table
     {
         parent::initialize($config);
 
-        $this->setTable('vendor_programs');
-        $this->setDisplayField('id');
-        $this->setPrimaryKey('id');
+        $this->table('vendor_programs');
+        $this->displayField('id');
+        $this->primaryKey('id');
 
         $this->addBehavior('Timestamp');
 

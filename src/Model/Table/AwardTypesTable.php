@@ -32,9 +32,9 @@ class AwardTypesTable extends Table
     {
         parent::initialize($config);
 
-        $this->setTable('award_types');
-        $this->setDisplayField('name');
-        $this->setPrimaryKey('id');
+        $this->table('award_types');
+        $this->displayField('name');
+        $this->primaryKey('id');
 
         $this->hasMany('Awards', [
             'foreignKey' => 'award_type_id',

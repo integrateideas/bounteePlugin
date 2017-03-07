@@ -36,9 +36,9 @@ class PeoplehubUsersTable extends Table
     {
         parent::initialize($config);
 
-        $this->setTable('peoplehub_users');
-        $this->setDisplayField('id');
-        $this->setPrimaryKey('id');
+        $this->table('peoplehub_users');
+        $this->displayField('id');
+        $this->primaryKey('id');
 
         $this->addBehavior('Timestamp');
 

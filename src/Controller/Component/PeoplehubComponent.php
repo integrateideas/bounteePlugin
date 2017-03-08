@@ -149,7 +149,9 @@ class PeoplehubComponent extends Component
     {
         //call renewToken function
         if($resource == 'user'){
-           $token = $this->_getToken('post','user','login');   
+            if($subResource != 'register'){
+              $token = $this->_getToken('post','user','login');   
+            }
        }else if($resource == 'reseller'){
         $token = $this->_getToken('post','reseller','token');
     }else if($resource == 'vendor'){
@@ -170,8 +172,12 @@ class PeoplehubComponent extends Component
      $response = $http->$httpMethod($newurl, [], [
         'headers' => ['Authorization' => $token]]);
      }else{
-        $response = $http->$httpMethod($url, json_encode($payload), [
-            'headers' => ['Authorization' => $token]]);
+        if($subResource != 'register'){
+            $response = $http->$httpMethod($url, json_encode($payload), [
+            'headers' => ['Authorization' => $token]]);           
+        }else{
+            $response = $http->$httpMethod($url, json_encode($payload)); 
+        }
     }
     if($response->isOk()){
         $response = json_decode($response->body());

@@ -3,6 +3,7 @@
 namespace Integrateideas\Peoplehub\Controller\Api;
 
 use Cake\Controller\Controller;
+use Cake\Event\Event;
 
 
 class ApiController extends Controller

@@ -17,7 +17,7 @@ use Cake\Network\Http\Client;
 class PeoplehubComponent extends Component
 {
 
-    const PEOPLEHUB_URL = "http://peoplehub.twinspark.co/peoplehub/api";
+   const PEOPLEHUB_URL = "http://peoplehub.twinspark.co/peoplehub/api";
     private $_endpoint = null;
     private  $_session = null;
     private $_clientId = null;
@@ -89,6 +89,7 @@ class PeoplehubComponent extends Component
         $httpMethod = strtolower($httpMethod);
         $http = new Client();
         $url = $this->_createUrl($resource, $subResource, $subResourceId = false);
+
         if($resource == 'reseller' && $subResource == 'token'){
             $response = $http->$httpMethod($url, [], [
                 'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret)]
@@ -99,6 +100,7 @@ class PeoplehubComponent extends Component
                 ]);
         }
         else if($resource == 'user' && $subResource == 'login'){
+            // pr($url);
             $response = $http->$httpMethod($url, [], [
                 'headers' => ['Authorization' => 'Basic '.base64_encode($headerData['username'].':'.$headerData['password'])]
                 ]);
@@ -107,10 +109,12 @@ class PeoplehubComponent extends Component
 
     }
 
-    private function _getToken($httpMethod,$resource,$subResource,$subResourceId=false,$payload=false){
+    private function _getToken($httpMethod,$resource,$subResource,$subResourceId=false,$headerData = false,$payload=false){
         
+        // pr($headerData); die;
         $this->_validateInfo($httpMethod,$resource,$subResource);
         $readToken = $this->_session->read('t');
+            // pr($readToken);
         $isRenewRequired = false;
         if(!$readToken){
             $isRenewRequired = true;
@@ -124,7 +128,7 @@ class PeoplehubComponent extends Component
             }
         }
         if($isRenewRequired){
-            $response = $this->_renewToken($httpMethod,$resource,$subResource,$subResourceId,$headerData = false, $payload);
+            $response = $this->_renewToken($httpMethod,$resource,$subResource,$subResourceId,$headerData, $payload); 
             if($response->isOk()){
                 $response = json_decode($response->body());
                 if($response->status){
@@ -146,20 +150,31 @@ class PeoplehubComponent extends Component
     }
 
     public function requestData($httpMethod,$resource, $subResource, $subResourceId = false, $headerData = false, $payload=false,$vendorId = null)
-    {
+    { 
+        // pr($headerData); die;
         //call renewToken function
         if($resource == 'user'){
             if($subResource != 'register'){
-              $token = $this->_getToken('post','user','login');   
+              $token = $this->_getToken('post','user','login', false, $headerData);   
             }
        }else if($resource == 'reseller'){
-        $token = $this->_getToken('post','reseller','token');
-    }else if($resource == 'vendor'){
-        $token = $this->_getToken('post','vendor','token',false,['vendor_id' => $vendorId]);
-    }else{
-        throw new Exception("Resource name is mispelled or not found");
-        
-    }
+            $token = $this->_getToken('post','reseller','token');
+       }else if($resource == 'vendor'){
+            $token = $this->_getToken('post','vendor','token',false,['vendor_id' => $vendorId]);
+       }else{
+            throw new Exception("Resource name is mispelled or not found");
+            
+       }
+       if($subResource != 'token' || $subResource != 'login'){
+            $token = isset($token) ? $token : null;
+            return $this->_sentRequest($token,$httpMethod,$resource, $subResource, $subResourceId, $headerData, $payload,$vendorId);
+       }else{
+          return $token;
+       }
+    
+  }
+
+  private function _sentRequest($token, $httpMethod,$resource, $subResource, $subResourceId, $headerData, $payload,$vendorId){
     $httpMethod = strtolower($httpMethod);
     $http = new Client();
     $url = $this->_createUrl($resource, $subResource, $subResourceId);
@@ -179,6 +194,7 @@ class PeoplehubComponent extends Component
             $response = $http->$httpMethod($url, json_encode($payload)); 
         }
     }
+    // pr($response->body()); 
     if($response->isOk()){
         $response = json_decode($response->body());
         if($response->status){

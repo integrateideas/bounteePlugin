@@ -5,7 +5,7 @@ use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-
+use App\AuditStashPersister\Traits\AuditLogTrait;
 /**
  * Awards Model
  *
@@ -24,7 +24,7 @@ use Cake\Validation\Validator;
  */
 class AwardsTable extends Table
 {
-
+    use AuditLogTrait;
     /**
      * Initialize method
      *
@@ -40,6 +40,7 @@ class AwardsTable extends Table
         $this->primaryKey('id');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('AuditStash.AuditLog');
 
         $this->belongsTo('AwardTypes', [
             'foreignKey' => 'award_type_id',

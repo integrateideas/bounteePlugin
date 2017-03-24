@@ -5,7 +5,7 @@ use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-
+use App\AuditStashPersister\Traits\AuditLogTrait;
 /**
  * VendorPrograms Model
  *
@@ -24,7 +24,7 @@ use Cake\Validation\Validator;
  */
 class VendorProgramsTable extends Table
 {
-
+    use AuditLogTrait;
     /**
      * Initialize method
      *
@@ -40,6 +40,7 @@ class VendorProgramsTable extends Table
         $this->primaryKey('id');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('AuditStash.AuditLog');
 
         $this->belongsTo('Clients', [
             'foreignKey' => 'client_id',

@@ -5,8 +5,8 @@ use Integrateideas\Peoplehub\Controller\Api\ApiController;
 use Integrateideas\Peoplehub\Controller\Component;
 use Cake\Core\Configure;
 use Cake\Event\Event;
-use Cake\Network\Exception;
-
+use Cake\Core\Exception\Exception;
+use Cake\Core\Exception\BadRequestException;
 /**
  * Patients Controller
  *
@@ -27,79 +27,50 @@ class PatientsController extends ApiController
 
     }
 
+
     public function registerPatient(){
-       $data = ['name'=> 'damon', 'email'=> 'damon@test.com', 'password'=>'123456789', 'phone'=>'1234567890'];
-       $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $data); 
-       if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+       $this->request->data['name'] = $this->request->data['first_name'].' '.$this->request->data['last_name'];
+       $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $this->request->data); 
+       $this->set('response', $response);
+       $this->set('_serialize', 'response');
     }
 
     public function loginPatient(){
-
-       $headerData = ['username'=> $this->request->data['username'], 'password'=>$this->request->data['username']];
+       $headerData = ['username'=> $this->request->data['username'], 'password'=>$this->request->data['password']];
        $response = $this->Peoplehub->requestData('post', 'user', 'login', false, $headerData);
-       if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+       $this->set('response', $response);
+       $this->set('_serialize', 'response');
     }
 
     public function getPatientActivities(){
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
         $response = $this->Peoplehub->requestData('get', 'user', 'activities',  false, $headerData);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
     public function addPatientCard(){
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
-        $data = ['card_number' => 4444333322221111];
-        $response = $this->Peoplehub->requestData('post', 'user', 'user-cards', false, $headerData, $data);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+        $response = $this->Peoplehub->requestData('post', 'user', 'user-cards', false, false, $this->request->data);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
     public function getPatientCardInfo(){
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
-        $response = $this->Peoplehub->requestData('get', 'user', 'user-cards', false, $headerData);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+        $response = $this->Peoplehub->requestData('get', 'user', 'user-cards', false);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
-    public function getPatientSpecificCardInfo(){
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
-        $subResourceId = 1;
-        $response = $this->Peoplehub->requestData('get', 'user', 'user-cards', $subResourceId, $headerData);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+    public function getPatientSpecificCardInfo($id){
+        $response = $this->Peoplehub->requestData('get', 'user', 'user-cards', $id);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
     public function forgotPassword(){
-        $headerData = ['username'=> 'damon@test.com', 'password'=>123456789];
-        $data = ['username' => 'vikie@test.com', 'ref' => 'dfghjkkdfghj'];
-        $response = $this->Peoplehub->requestData('post', 'user', 'forgot_password', false, $headerData, $data);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-            $this->_fireEvent('forgotPassword',$response);
-       } 
+        $response = $this->Peoplehub->requestData('post', 'user', 'forgot_password', false, false, $this->request->data);
+        $this->_fireEvent('forgotPassword',$response);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
     protected function _fireEvent($name, $data){
@@ -112,68 +83,48 @@ class PatientsController extends ApiController
     }
 
     public function resetPassword(){
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
-        $data = ['reset-token' => '$2y$10$PpeXFXmAaG9y1Bw6VvIhqe1DRGeJCEke9XAP8c3YO7Bw6.iesQgH2', 'new_password' => '12345678', 'cnf_password' => '12345678'];
-        $response = $this->Peoplehub->requestData('post', 'user', 'reset_password', false, $headerData, $data);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+        $response = $this->Peoplehub->requestData('post', 'user', 'reset_password', false, false, $this->request->data);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
     public function redeemedCredits(){
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
-        $data = ['ref' => 'sdfghjk', 'service' => 'amazon/tango'];
-        $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, $headerData, $data);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       } 
+        $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, false, $this->request->data);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
     public function switchAccount(){
-        $data = ['account_id' => '1234'];
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
-        $response = $this->Peoplehub->requestData('put', 'user', 'switch_account', false, $headerData, $data);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+        $response = $this->Peoplehub->requestData('put', 'user', 'switch_account', false, false, $this->request->data);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
-    public function editPatient(){
-        $data = ['name' => 'damon12'];
-        $subResourceId = 6;
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
-        $response = $this->Peoplehub->requestData('put', 'user', 'users', $subResourceId, $headerData, $data);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+    public function editPatient($id){
+       $response = $this->Peoplehub->requestData('put', 'user', 'users', $id, false, $this->request->data);
+       $this->set('response', $response);
+       $this->set('_serialize', 'response');
     }
 
-    public function getPatientInfo(){
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
-        $response = $this->Peoplehub->requestData('get', 'user', 'me', false, $headerData);
-        if($response['status'] != true){
-           throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+    public function getPatientInfo($id){
+        $payload = ['vendor_id' => $id];
+        $response = $this->Peoplehub->requestData('get', 'user', 'me', false, false, $payload);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
+
+    public function fbLogin(){
+        $response = $this->Peoplehub->requestData('post', 'user', 'fb-login', false, false, $this->request->data);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');  
     }
 
     public function logout(){
-        $headerData = ['username'=> 'damon@test.com', 'password'=>'123456789'];
-        $response = $this->Peoplehub->requestData('post', 'user', 'logout', false, $headerData);
-        if($response['status'] != true){
-            throw new Exception('Something is wrong');
-       }else{
-         $this->set('response', $response);
-       }
+        $response = $this->Peoplehub->requestData('post', 'user', 'logout', false);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
 }
+
+//(folowing api's working fine: registerPatient, loginPatient, forgotPassword)

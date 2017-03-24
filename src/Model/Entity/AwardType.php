@@ -2,6 +2,7 @@
 namespace Integrateideas\Peoplehub\Model\Entity;
 
 use Cake\ORM\Entity;
+use App\AuditStashPersister\Traits\AuditLogTrait;
 
 /**
  * AwardType Entity
@@ -13,7 +14,7 @@ use Cake\ORM\Entity;
  */
 class AwardType extends Entity
 {
-
+    use AuditLogTrait;
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
      *

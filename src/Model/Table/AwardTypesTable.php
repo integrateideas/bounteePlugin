@@ -5,6 +5,7 @@ use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use App\AuditStashPersister\Traits\AuditLogTrait;
 
 /**
  * AwardTypes Model
@@ -21,7 +22,7 @@ use Cake\Validation\Validator;
  */
 class AwardTypesTable extends Table
 {
-
+    use AuditLogTrait;
     /**
      * Initialize method
      *
@@ -35,6 +36,7 @@ class AwardTypesTable extends Table
         $this->table('award_types');
         $this->displayField('name');
         $this->primaryKey('id');
+        $this->addBehavior('AuditStash.AuditLog');
 
         $this->hasMany('Awards', [
             'foreignKey' => 'award_type_id',

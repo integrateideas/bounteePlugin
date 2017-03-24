@@ -5,7 +5,7 @@ use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-
+use App\AuditStashPersister\Traits\AuditLogTrait;
 /**
  * PeoplehubUsers Model
  *
@@ -25,7 +25,7 @@ use Cake\Validation\Validator;
  */
 class PeoplehubUsersTable extends Table
 {
-
+    use AuditLogTrait;
     /**
      * Initialize method
      *
@@ -41,6 +41,7 @@ class PeoplehubUsersTable extends Table
         $this->primaryKey('id');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('AuditStash.AuditLog');
 
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',

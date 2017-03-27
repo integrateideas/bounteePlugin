@@ -63,10 +63,10 @@ class PeoplehubComponent extends Component
     private function _validateResourceAndSubResource($httpMethod,$identifier,$resource,$subResource){
         $attribute = $this->identifier;
         if(!empty($resource) && !array_key_exists($resource, $attribute[$httpMethod])){
-            throw new Exception(__("Resource Name is missing or mispelled. The available options are ".implode(", ", array_keys($variable[$httpMethod]))));
+            throw new Exception(__("Resource Name is missing or mispelled. The available options are ".implode(", ", array_keys($attribute[$httpMethod]))));
         }
         if (!empty($subResource) && !in_array($subResource, $attribute[$httpMethod][$resource])) {
-            throw new Exception(__("Incorrect Subresource provided or mispelled. The available options for ".$resource." are ".implode(", ", $variable[$httpMethod][$resource])));
+            throw new Exception(__("Incorrect Subresource provided or mispelled. The available options for ".$resource." are ".implode(", ", $attribute[$httpMethod][$resource])));
         }  
     }
 

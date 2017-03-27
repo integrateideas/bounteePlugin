@@ -61,11 +61,12 @@ class PeoplehubComponent extends Component
                                           ];
 
     private function _validateResourceAndSubResource($httpMethod,$identifier,$resource,$subResource){
-        if(!empty($resource) && !array_key_exists($resource, $this->$identifier[$httpMethod])){
-            throw new Exception(__("Resource Name is missing or mispelled. The available options are ".implode(", ", array_keys($this->$identifier[$httpMethod]))));
+        $attribute = $this->identifier;
+        if(!empty($resource) && !array_key_exists($resource, $attribute[$httpMethod])){
+            throw new Exception(__("Resource Name is missing or mispelled. The available options are ".implode(", ", array_keys($variable[$httpMethod]))));
         }
-        if (!empty($subResource) && !in_array($subResource, $this->$identifier[$httpMethod][$resource])) {
-            throw new Exception(__("Incorrect Subresource provided or mispelled. The available options for ".$resource." are ".implode(", ", $this->$identifier[$httpMethod][$resource])));
+        if (!empty($subResource) && !in_array($subResource, $attribute[$httpMethod][$resource])) {
+            throw new Exception(__("Incorrect Subresource provided or mispelled. The available options for ".$resource." are ".implode(", ", $variable[$httpMethod][$resource])));
         }  
     }
 
@@ -187,10 +188,6 @@ class PeoplehubComponent extends Component
                     $err['data']['data']=json_decode($response->body());
                     return $err;
                 }
-            }else{
-                //throw error
-                throw new Exception('Unable to get '.$resource.' token.');
-
             }
         }else{
             // pr(' m here when not expired'); die;

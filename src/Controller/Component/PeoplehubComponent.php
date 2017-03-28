@@ -56,7 +56,7 @@ class PeoplehubComponent extends Component
 
                                             'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password', 'fb-login'],
 
-                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series']
+                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits']
                                             ]
                                           ];
 

@@ -125,6 +125,10 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
+    public function referral(){
+        $this->_fireEvent('Referrals', $this->request->data);
+    }
+
 }
 
 //(folowing api's working fine: registerPatient, loginPatient, forgotPassword)

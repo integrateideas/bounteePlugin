@@ -36,7 +36,7 @@ class PeoplehubComponent extends Component
 
     private $_resourcesWithIdentifier = [                        
                                             'get'=>[
-                                            'reseller'=>['vendors'],
+                                            'reseller'=>['vendors', 'reseller-card-series'],
                                             'user' => ['me', 'activities', 'user-cards'],
                                             'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
                                             ],
@@ -52,7 +52,7 @@ class PeoplehubComponent extends Component
     private $_resourcesWithoutIdentifier = [                        
 
                                             'post' => [
-                                            'reseller'=>['token', 'vendors', 'vendor-cards'],
+                                            'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series'],
 
                                             'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password', 'fb-login'],
 

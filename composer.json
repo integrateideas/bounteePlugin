@@ -1,7 +1,6 @@
 {
-    "name": "integrateideas/bounteeplugin",
-    "description": "Integrateideas/BounteePlugin plugin for CakePHP",
-    "version":"0.0.1",
+    "name": "integrateideas/peoplehub",
+    "description": "Integrateideas/Peoplehub plugin for CakePHP",
     "type": "cakephp-plugin",
     "require": {
         "php": ">=5.5.9",
@@ -27,12 +26,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Integrateideas\\BounteePlugin\\": "src"
+            "Integrateideas\\Peoplehub\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Integrateideas\\BounteePlugin\\Test\\": "tests",
+            "Integrateideas\\Peoplehub\\Test\\": "tests",
             "Cake\\Test\\": "./vendor/cakephp/cakephp/tests"
         }
     }

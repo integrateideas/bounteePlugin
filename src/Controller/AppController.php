@@ -1,6 +1,6 @@
 <?php
 
-namespace Integrateideas\BounteePlugin\Controller;
+namespace Integrateideas\Peoplehub\Controller;
 
 use App\Controller\AppController as BaseController;
 

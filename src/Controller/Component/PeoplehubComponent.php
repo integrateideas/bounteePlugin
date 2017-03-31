@@ -17,19 +17,16 @@ use Cake\Network\Http\Client;
 class PeoplehubComponent extends Component
 {
 
- const PEOPLEHUB_URL = "http://peoplehub.twinspark.co/bountee_dev/api";
  private $_endpoint = null;
  private  $_session = null;
  private $_clientId = null;
  private $_clientSecret = null;
-    private $_userType= null; //reseller or vendor or user
 
     public function initialize(array $config)
     {
         $this->_clientId = $config['clientId'];
         $this->_clientSecret = $config['clientSecret'];
-        $this->_userType = $config['userType'];
-        $this->_endpoint = self::PEOPLEHUB_URL."/";
+        $this->_endpoint = $config['apiEndPointHost']."/api/";
         $this->_session = new Session();
         // pr($content = $this->_session->read('data')); die;
     }
@@ -56,7 +53,7 @@ class PeoplehubComponent extends Component
 
                                             'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password', 'fb-login'],
 
-                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users']
+                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit']
                                             ]
                                           ];
 

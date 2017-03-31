@@ -30,7 +30,8 @@ class PatientsController extends ApiController
 
     public function registerPatient(){
        $this->request->data['name'] = $this->request->data['first_name'].' '.$this->request->data['last_name'];
-       $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $this->request->data); 
+       $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $this->request->data);
+       $this->_fireEvent('registerPatient', $response); 
        $this->set('response', $response);
        $this->set('_serialize', 'response');
     }
@@ -90,6 +91,7 @@ class PatientsController extends ApiController
 
     public function redeemedCredits(){
         $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, false, $this->request->data);
+        $this->_fireEvent('redemptions', $response);
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
@@ -126,7 +128,10 @@ class PatientsController extends ApiController
     }
 
     public function referral(){
-        $this->_fireEvent('Referrals', $this->request->data);
+        $response = $this->request->data;
+        $this->_fireEvent('Referrals', $response);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
 }

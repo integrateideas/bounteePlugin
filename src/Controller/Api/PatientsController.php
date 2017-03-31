@@ -18,10 +18,16 @@ class PatientsController extends ApiController
     public function initialize()
     {
         parent::initialize();
-        $this->loadComponent('Integrateideas/Peoplehub.Peoplehub', [ 
-        'clientId' => Configure::read('Peoplehub.clientId'),
-        'clientSecret' =>Configure::read('Peoplehub.clientSecret'),
-        'userType' => Configure::read('Peoplehub.userType')
+
+        if($this->request->header('mode')){
+            $host = Configure::read('application.livePhUrl');
+        }else{
+            $host = Configure::read('application.phUrl');
+        }
+        $this->loadComponent('Integrateideas/Peoplehub.Peoplehub', [
+        'clientId' => Configure::read('reseller.client_id'),
+        'clientSecret' =>Configure::read('reseller.client_secret'),
+        'apiEndPointHost' => $host
       ]);
         $this->loadComponent('RequestHandler');
 
@@ -90,8 +96,9 @@ class PatientsController extends ApiController
     }
 
     public function redeemedCredits(){
+        $this->_fireEvent('beforeRedemption', $this->request->data);
         $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, false, $this->request->data);
-        $this->_fireEvent('redemptions', $response);
+        $this->_fireEvent('afterRedemption', $response);
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
@@ -130,8 +137,6 @@ class PatientsController extends ApiController
     public function referral(){
         $response = $this->request->data;
         $this->_fireEvent('Referrals', $response);
-        $this->set('response', $response);
-        $this->set('_serialize', 'response');
     }
 
 }

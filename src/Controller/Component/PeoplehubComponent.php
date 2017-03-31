@@ -202,7 +202,7 @@ class PeoplehubComponent extends Component
         $this->_validateInfo($httpMethod,$resource,$subResource);
 
         if($resource == 'user'){
-            if($subResource != 'register'){
+            if($subResource != 'register' && $subResource != 'forgot_password'){
               $response = $this->_getToken('post','user','login', false, $headerData);
               if(isset($response->status)){
                 $token = $response->data->token;               

@@ -92,23 +92,31 @@ class PeoplehubComponent extends Component
 
         if($resource == 'reseller'){
             $response = $http->$httpMethod($url, [], [
-                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret), 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base]
+                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret), 
+                //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
                 ]);
         }else if($resource == 'vendor'){
             $response = $http->$httpMethod($url, json_encode($payload), [
-                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret), 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base]
+                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret), 
+                //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
                 ]);
         }
         else if($resource == 'user'){
             if(isset($headerData['username']) && isset($headerData['password'])){
                 $response = $http->$httpMethod($url, [], [
-                'headers' => ['Authorization' => 'Basic '.base64_encode($headerData['username'].':'.$headerData['password']), 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base]
+                'headers' => ['Authorization' => 'Basic '.base64_encode($headerData['username'].':'.$headerData['password']), 
+                // 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
                 ]);
             }else{
 
                 // pr($headerData);
                 $response = $http->$httpMethod($url, [], [
-                'headers' => ['Authorization' => $headerData, 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base]
+                'headers' => ['Authorization' => $headerData,
+                // 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
                 ]);
                 // pr($response);
             }

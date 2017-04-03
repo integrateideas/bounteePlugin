@@ -37,6 +37,8 @@ class PatientsController extends ApiController
     public function registerPatient(){
        $this->request->data['name'] = $this->request->data['first_name'].' '.$this->request->data['last_name'];
        $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $this->request->data);
+       $response = [$response, $this->request->data];
+       // pr($response); die;
        $this->_fireEvent('registerPatient', $response); 
        $this->set('response', $response);
        $this->set('_serialize', 'response');
@@ -73,8 +75,9 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
-    public function forgotPassword(){
+   public function forgotPassword(){
         $response = $this->Peoplehub->requestData('post', 'user', 'forgot_password', false, false, $this->request->data);
+        $response = [$this->request->data,$response];
         $this->_fireEvent('forgotPassword',$response);
         $this->set('response', $response);
         $this->set('_serialize', 'response');
@@ -137,8 +140,11 @@ class PatientsController extends ApiController
     public function referral(){
         $response = $this->request->data;
         $this->_fireEvent('Referrals', $response);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
 }
 
 //(folowing api's working fine: registerPatient, loginPatient, forgotPassword)
+

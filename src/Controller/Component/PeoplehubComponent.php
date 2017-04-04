@@ -21,7 +21,7 @@ class PeoplehubComponent extends Component
  private  $_session = null;
  private $_clientId = null;
  private $_clientSecret = null;
-
+ private $_liveEndPointUrl =null;
     public function initialize(array $config)
     {
         $this->_clientId = $config['clientId'];

@@ -27,7 +27,8 @@ class PatientsController extends ApiController
         $this->loadComponent('Integrateideas/Peoplehub.Peoplehub', [
         'clientId' => Configure::read('reseller.client_id'),
         'clientSecret' =>Configure::read('reseller.client_secret'),
-        'apiEndPointHost' => $host
+        'apiEndPointHost' => $host,
+        'liveApiEndPointHost' => Configure::read('application.livePhUrl')
       ]);
         $this->loadComponent('RequestHandler');
 

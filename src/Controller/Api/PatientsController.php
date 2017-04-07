@@ -44,8 +44,12 @@ class PatientsController extends ApiController
        $this->set('_serialize', 'response');
     }
 
-    public function loginPatient(){
-       $headerData = ['username'=> $this->request->data['username'], 'password'=>$this->request->data['password']];
+    public function loginPatient($username = null, $password = null){
+        if(isset($username) && isset($password)){
+            $headerData = ['username'=> $username, 'password'=>$password];
+        }else{
+            $headerData = ['username'=> $this->request->data['username'], 'password'=>$this->request->data['password']];
+        }
        $response = $this->Peoplehub->requestData('post', 'user', 'login', false, $headerData);
        $this->set('response', $response);
        $this->set('_serialize', 'response');
@@ -114,6 +118,15 @@ class PatientsController extends ApiController
 
     public function editPatient($id){
        $response = $this->Peoplehub->requestData('put', 'user', 'users', $id, false, $this->request->data);
+       if(isset($response->data->guardian_email) && isset($this->request->data['password'])){
+         $username = $response->data->guardian_email;
+         $password = $this->request->data['password'];
+         $this->loginPatient($username, $password);
+        }else if(isset($response->data->username) && isset($this->request->data['password'])){
+          $username = $response->data->username;
+          $password = $this->request->data['password'];
+          $this->loginPatient($username, $password);
+        }
        $this->set('response', $response);
        $this->set('_serialize', 'response');
     }

@@ -45,10 +45,10 @@ class PatientsController extends ApiController
     }
 
     public function loginPatient($username = null, $password = null){
-        if(isset($username) && isset($password)){
-            $headerData = ['username'=> $username, 'password'=>$password];
-        }else{
+        if(isset($this->request->data['username']) && isset($this->request->data['password'])){
             $headerData = ['username'=> $this->request->data['username'], 'password'=>$this->request->data['password']];
+        }else{     
+            $headerData = ['username'=> $username, 'password'=>$password];
         }
        $response = $this->Peoplehub->requestData('post', 'user', 'login', false, $headerData);
        $this->set('response', $response);

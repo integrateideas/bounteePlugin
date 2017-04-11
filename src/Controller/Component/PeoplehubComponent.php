@@ -163,21 +163,33 @@ class PeoplehubComponent extends Component
             }
         }else{
             $readToken = $this->_session->read('token');
+            // pr($readToken); die;
             if(!$readToken){
                 $isRenewRequired = true;
             }else{
-                $expireToken = (isset($readToken->expires))?$readToken->expires:null;
+                $expireToken = (isset($readToken->data->expires))?$readToken->data->expires:null;
+                // pr($expireToken);
                 $expireTime = date("H:i:s",strtotime($expireToken));
+                // pr($expireTime);
                 $currentTime = Time::now();
                 $currentTime = date("H:i:s",strtotime($currentTime));
+                // pr($currentTime); die;
                 if($expireTime <= $currentTime){
+                    // pr(); die;
                     $isRenewRequired = true;
+                }else{
+                    // pr(' m here'); die;
+                   $isRenewRequired = false;
+                   $token = $readToken;
+                   // pr($token);
+                   return $token; 
                 }
             }
         }
         if($isRenewRequired){
             // pr('is renew is true');
             $response = $this->_renewToken($httpMethod,$resource,$subResource,$subResourceId,$headerData, $payload);
+            // pr($response->body()); die;
             if($response->isOk()){
                 $response = json_decode($response->body());
                 if($response->status){
@@ -203,8 +215,8 @@ class PeoplehubComponent extends Component
         }else{
             // pr(' m here when not expired'); die;
             $response = $token;
+            // pr($response); die;
         }
-        // pr($response); die;
         return $response;
     }
 

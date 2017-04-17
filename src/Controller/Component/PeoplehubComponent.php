@@ -45,6 +45,7 @@ class PeoplehubComponent extends Component
                                             ],
                                             'delete'=>[
                                             'reseller'=>['vendors'],
+                                            'vendor' => ['delete-user']
                                             ]
                                         ];
     private $_resourcesWithoutIdentifier = [                       

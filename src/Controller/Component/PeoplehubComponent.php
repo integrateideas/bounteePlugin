@@ -22,12 +22,14 @@ class PeoplehubComponent extends Component
  private $_clientId = null;
  private $_clientSecret = null;
  private $_liveEndPointUrl =null;
+ private $_errorMode = null;
     public function initialize(array $config)
     {
         $this->_clientId = $config['clientId'];
         $this->_clientSecret = $config['clientSecret'];
         $this->_endpoint = $config['apiEndPointHost']."/api/";
         $this->_liveEndPointUrl = $config['liveApiEndPointHost']."/api/";
+        $this->_errorMode =  $config['throwErrorMode'];
         $this->_session = new Session();
         // pr($content = $this->_session->read('data')); die;
     }
@@ -285,12 +287,19 @@ class PeoplehubComponent extends Component
     }else{
         $res = $response;
         $response = json_decode($response->body());
-        if(!isset($response->status)){
-            throw new Exception($response->message, $response->code);
+        if($this->_errorMode){
+
+            if(!isset($response->status)){
+                throw new Exception($response->message, $response->code);
+            }else{
+                $response->error = json_encode($response->error);
+                throw new Exception($response->error, $res->code);
+            }        
         }else{
-            $response->error = json_encode($response->error);
-            throw new Exception($response->error, $res->code);
-        }       
+
+            return $response;
+
+        }
     }
 }
 }

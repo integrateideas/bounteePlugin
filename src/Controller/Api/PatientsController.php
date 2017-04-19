@@ -138,12 +138,6 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
-    public function fbLogin(){
-        $response = $this->Peoplehub->requestData('post', 'user', 'fb-login', false, false, $this->request->data);
-        $this->set('response', $response);
-        $this->set('_serialize', 'response');  
-    }
-
     public function logout(){
         $response = $this->Peoplehub->requestData('post', 'user', 'logout', false);
         $this->set('response', $response);
@@ -153,6 +147,14 @@ class PatientsController extends ApiController
     public function referral(){
         $response = $this->request->data;
         $this->_fireEvent('Referrals', $response);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
+
+    public function validateSocialUser($id){
+        $payload = ['vendor_id' => $id];
+        $response = $this->Peoplehub->requestData('get', 'user', 'social-validate-user', false, false, $payload);
+        pr($response);die;
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }

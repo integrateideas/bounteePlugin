@@ -37,7 +37,7 @@ class PeoplehubComponent extends Component
     private $_resourcesWithIdentifier = [                       
                                             'get'=>[
                                             'reseller'=>['vendors', 'reseller-card-series'],
-                                            'user' => ['me', 'activities', 'user-cards'],
+                                            'user' => ['me', 'activities', 'user-cards','social-validate-user'],
                                             'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
                                             ],
                                             'put'=>[
@@ -55,9 +55,9 @@ class PeoplehubComponent extends Component
                                             'post' => [
                                             'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series'],
 
-                                            'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password', 'fb-login'],
+                                            'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password','social-login'],
 
-                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit','social-user-login']
+                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit']
                                             ]
                                           ];
 

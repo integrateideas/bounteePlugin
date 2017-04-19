@@ -29,7 +29,7 @@ class PeoplehubComponent extends Component
         $this->_clientSecret = $config['clientSecret'];
         $this->_endpoint = $config['apiEndPointHost']."/api/";
         $this->_liveEndPointUrl = $config['liveApiEndPointHost']."/api/";
-        $this->_errorMode =  $config['throwErrorMode'];
+        $this->_errorMode = ( isset($config['throwErrorMode']))?$config['throwErrorMode']:true;
         $this->_session = new Session();
         // pr($content = $this->_session->read('data')); die;
     }
@@ -57,7 +57,7 @@ class PeoplehubComponent extends Component
 
                                             'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password', 'fb-login'],
 
-                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit']
+                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit','social-user-login']
                                             ]
                                           ];
 

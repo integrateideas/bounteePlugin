@@ -138,12 +138,6 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
-    public function fbLogin(){
-        $response = $this->Peoplehub->requestData('post', 'user', 'fb-login', false, false, $this->request->data);
-        $this->set('response', $response);
-        $this->set('_serialize', 'response');  
-    }
-
     public function logout(){
         $response = $this->Peoplehub->requestData('post', 'user', 'logout', false);
         $this->set('response', $response);
@@ -154,6 +148,25 @@ class PatientsController extends ApiController
         $response = $this->request->data;
         $this->_fireEvent('Referrals', $response);
         $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
+
+   public function validateSocialUser(){
+          return $this->redirect('http://localhost/peoplehub/api/user/social-validate-user?provider=Facebook&vendor_id=2');
+      // die;
+        // $payload = $this->request->query;
+        // $response = $this->Peoplehub->requestData('get', 'user', 'social-validate-user', false, false, $payload);
+        // pr($response);die;
+        // $this->set('response', $response);
+        // $this->set('_serialize', 'response');
+    }
+
+    public function socialLogin(){
+        $headerData = ['BasicToken'=>$this->request->header('Authorization')];
+        $response = $this->Peoplehub->requestData('post', 'user', 'social-login', false, $headerData, false);
+        //pr($response);
+        $response = json_decode($response);
+        $this->set('response', $response->data);
         $this->set('_serialize', 'response');
     }
 

@@ -18,10 +18,17 @@ class PatientsController extends ApiController
     public function initialize()
     {
         parent::initialize();
-        $this->loadComponent('Integrateideas/Peoplehub.Peoplehub', [ 
-        'clientId' => Configure::read('Peoplehub.clientId'),
-        'clientSecret' =>Configure::read('Peoplehub.clientSecret'),
-        'userType' => Configure::read('Peoplehub.userType')
+
+        if($this->request->header('mode')){
+            $host = Configure::read('application.livePhUrl');
+        }else{
+            $host = Configure::read('application.phUrl');
+        }
+        $this->loadComponent('Integrateideas/Peoplehub.Peoplehub', [
+        'clientId' => Configure::read('reseller.client_id'),
+        'clientSecret' =>Configure::read('reseller.client_secret'),
+        'apiEndPointHost' => $host,
+        'liveApiEndPointHost' => Configure::read('application.livePhUrl')
       ]);
         $this->loadComponent('RequestHandler');
 
@@ -30,13 +37,19 @@ class PatientsController extends ApiController
 
     public function registerPatient(){
        $this->request->data['name'] = $this->request->data['first_name'].' '.$this->request->data['last_name'];
-       $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $this->request->data); 
+       $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $this->request->data);
+       // pr($response); die;
+       $this->_fireEvent('registerPatient', $response); 
        $this->set('response', $response);
        $this->set('_serialize', 'response');
     }
 
-    public function loginPatient(){
-       $headerData = ['username'=> $this->request->data['username'], 'password'=>$this->request->data['password']];
+    public function loginPatient($username = null, $password = null){
+        if(isset($this->request->data['username']) && isset($this->request->data['password'])){
+            $headerData = ['username'=> $this->request->data['username'], 'password'=>$this->request->data['password']];
+        }else{     
+            $headerData = ['username'=> $username, 'password'=>$password];
+        }
        $response = $this->Peoplehub->requestData('post', 'user', 'login', false, $headerData);
        $this->set('response', $response);
        $this->set('_serialize', 'response');
@@ -66,8 +79,9 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
-    public function forgotPassword(){
+   public function forgotPassword(){
         $response = $this->Peoplehub->requestData('post', 'user', 'forgot_password', false, false, $this->request->data);
+        $response = [$this->request->data,$response];
         $this->_fireEvent('forgotPassword',$response);
         $this->set('response', $response);
         $this->set('_serialize', 'response');
@@ -89,7 +103,9 @@ class PatientsController extends ApiController
     }
 
     public function redeemedCredits(){
+        $this->_fireEvent('beforeRedemption', $this->request->data);
         $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, false, $this->request->data);
+        $this->_fireEvent('afterRedemption', $response);
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
@@ -102,6 +118,15 @@ class PatientsController extends ApiController
 
     public function editPatient($id){
        $response = $this->Peoplehub->requestData('put', 'user', 'users', $id, false, $this->request->data);
+       if(isset($response->data->guardian_email) && isset($this->request->data['password'])){
+         $username = $response->data->guardian_email;
+         $password = $this->request->data['password'];
+         $this->loginPatient($username, $password);
+        }else if(isset($response->data->username) && isset($this->request->data['password'])){
+          $username = $response->data->username;
+          $password = $this->request->data['password'];
+          $this->loginPatient($username, $password);
+        }
        $this->set('response', $response);
        $this->set('_serialize', 'response');
     }
@@ -113,12 +138,6 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
-    public function fbLogin(){
-        $response = $this->Peoplehub->requestData('post', 'user', 'fb-login', false, false, $this->request->data);
-        $this->set('response', $response);
-        $this->set('_serialize', 'response');  
-    }
-
     public function logout(){
         $response = $this->Peoplehub->requestData('post', 'user', 'logout', false);
         $this->set('response', $response);
@@ -126,9 +145,21 @@ class PatientsController extends ApiController
     }
 
     public function referral(){
-        $this->_fireEvent('Referrals', $this->request->data);
+        $response = $this->request->data;
+        $this->_fireEvent('Referrals', $response);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
+
+    public function validateSocialUser($id){
+        $payload = ['vendor_id' => $id];
+        $response = $this->Peoplehub->requestData('get', 'user', 'social-validate-user', false, false, $payload);
+        pr($response);die;
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
 }
 
 //(folowing api's working fine: registerPatient, loginPatient, forgotPassword)
+

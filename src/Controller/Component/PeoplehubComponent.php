@@ -8,7 +8,7 @@ use Cake\Core\Configure;
 use Cake\Core\Exception\Exception;
 use Cake\Log\Log;
 use Cake\I18n\Time;
-use Cake\Network\Session;   
+use Cake\Network\Session;  
 use Cake\Network\Http\Client;
 
 /**
@@ -17,27 +17,27 @@ use Cake\Network\Http\Client;
 class PeoplehubComponent extends Component
 {
 
- const PEOPLEHUB_URL = "http://peoplehub.twinspark.co/bountee_dev/api";
  private $_endpoint = null;
  private  $_session = null;
  private $_clientId = null;
  private $_clientSecret = null;
-    private $_userType= null; //reseller or vendor or user
-
+ private $_liveEndPointUrl =null;
+ private $_errorMode = null;
     public function initialize(array $config)
     {
         $this->_clientId = $config['clientId'];
         $this->_clientSecret = $config['clientSecret'];
-        $this->_userType = $config['userType'];
-        $this->_endpoint = self::PEOPLEHUB_URL."/";
+        $this->_endpoint = $config['apiEndPointHost']."/api/";
+        $this->_liveEndPointUrl = $config['liveApiEndPointHost']."/api/";
+        $this->_errorMode = ( isset($config['throwErrorMode']))?$config['throwErrorMode']:true;
         $this->_session = new Session();
         // pr($content = $this->_session->read('data')); die;
     }
 
-    private $_resourcesWithIdentifier = [                        
+    private $_resourcesWithIdentifier = [                       
                                             'get'=>[
                                             'reseller'=>['vendors', 'reseller-card-series'],
-                                            'user' => ['me', 'activities', 'user-cards'],
+                                            'user' => ['me', 'activities', 'user-cards','social-validate-user'],
                                             'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
                                             ],
                                             'put'=>[
@@ -47,16 +47,17 @@ class PeoplehubComponent extends Component
                                             ],
                                             'delete'=>[
                                             'reseller'=>['vendors'],
+                                            'vendor' => ['users']
                                             ]
                                         ];
-    private $_resourcesWithoutIdentifier = [                        
+    private $_resourcesWithoutIdentifier = [                       
 
                                             'post' => [
                                             'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series'],
 
-                                            'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password', 'fb-login'],
+                                            'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password','social-login'],
 
-                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users']
+                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit']
                                             ]
                                           ];
 
@@ -67,24 +68,29 @@ class PeoplehubComponent extends Component
         }
         if (!empty($subResource) && !in_array($subResource, $attribute[$httpMethod][$resource])) {
             throw new Exception(__("Incorrect Subresource provided or mispelled. The available options for ".$resource." are ".implode(", ", $attribute[$httpMethod][$resource])));
-        }  
+        } 
     }
 
 
     private function _validateInfo($httpMethod,$resource,$subResource){
-        if(array_key_exists($httpMethod, $this->_resourcesWithIdentifier)){ 
+        if(array_key_exists($httpMethod, $this->_resourcesWithIdentifier)){
             $this->_validateResourceAndSubResource($httpMethod,'_resourcesWithIdentifier',$resource,$subResource);
         }else if(array_key_exists($httpMethod, $this->_resourcesWithoutIdentifier)){
-            $this->_validateResourceAndSubResource($httpMethod,'_resourcesWithoutIdentifier',$resource,$subResource); 
+            $this->_validateResourceAndSubResource($httpMethod,'_resourcesWithoutIdentifier',$resource,$subResource);
         }else{
-            throw new Exception(__("Request method is mispelled")); 
+            throw new Exception(__("Request method is mispelled"));
         }
 
     }
 
     private function _createUrl($resource, $subResource, $subResourceId = false)
     {
-        return $this->_endpoint . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);
+        if($subResource == 'add-vendor-to-live'){
+            return $this->_liveEndPointUrl . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);
+        }else{
+            return $this->_endpoint . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);   
+        }
+       
     }
 
     private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=false,$headerData=false,$payload=false){
@@ -95,27 +101,35 @@ class PeoplehubComponent extends Component
 
         if($resource == 'reseller'){
             $response = $http->$httpMethod($url, [], [
-                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret), 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base]
+                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret),
+                //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
                 ]);
         }else if($resource == 'vendor'){
             $response = $http->$httpMethod($url, json_encode($payload), [
-                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret), 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base]
+                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret),
+                //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
                 ]);
         }
         else if($resource == 'user'){
             if(isset($headerData['username']) && isset($headerData['password'])){
                 $response = $http->$httpMethod($url, [], [
-                'headers' => ['Authorization' => 'Basic '.base64_encode($headerData['username'].':'.$headerData['password']), 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base]
+                'headers' => ['Authorization' => 'Basic '.base64_encode($headerData['username'].':'.$headerData['password']),
+                // 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
                 ]);
             }else{
 
                 // pr($headerData);
                 $response = $http->$httpMethod($url, [], [
-                'headers' => ['Authorization' => $headerData, 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base]
+                'headers' => ['Authorization' => $headerData,
+                // 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
                 ]);
                 // pr($response);
             }
-            
+           
         }
         // pr($response->body()); die;
         return $response;
@@ -131,10 +145,10 @@ class PeoplehubComponent extends Component
                 $token = str_replace('Bearer ', '', $token);
                 $readToken = unserialize($this->_session->read($token));
                 if($readToken){
-                   //now check if token is expired or not. if expired set $isRrenewRequired = true;  
+                   //now check if token is expired or not. if expired set $isRrenewRequired = true; 
                    $expireToken = (isset($readToken[1]))?$readToken[1]:null;
                    $expireTime = date("H:i:s",strtotime($expireToken));
-                   // pr($expireTime); 
+                   // pr($expireTime);
                    $currentTime = Time::now();
                    $currentTime = date("H:i:s",strtotime($currentTime));
                    // pr($currentTime); die;
@@ -146,27 +160,39 @@ class PeoplehubComponent extends Component
                         $isRenewRequired = false;
                         return $token;
                    }
-               } 
+               }
             }else{
                 $isRenewRequired = true;
             }
         }else{
             $readToken = $this->_session->read('token');
+            // pr($readToken); die;
             if(!$readToken){
                 $isRenewRequired = true;
             }else{
-                $expireToken = (isset($readToken->expires))?$readToken->expires:null;
+                $expireToken = (isset($readToken->data->expires))?$readToken->data->expires:null;
+                // pr($expireToken);
                 $expireTime = date("H:i:s",strtotime($expireToken));
+                // pr($expireTime);
                 $currentTime = Time::now();
                 $currentTime = date("H:i:s",strtotime($currentTime));
+                // pr($currentTime); die;
                 if($expireTime <= $currentTime){
+                    // pr(); die;
                     $isRenewRequired = true;
+                }else{
+                    // pr(' m here'); die;
+                   $isRenewRequired = false;
+                   $token = $readToken;
+                   // pr($token);
+                   return $token; 
                 }
             }
         }
         if($isRenewRequired){
             // pr('is renew is true');
             $response = $this->_renewToken($httpMethod,$resource,$subResource,$subResourceId,$headerData, $payload);
+            // pr($response->body()); die;
             if($response->isOk()){
                 $response = json_decode($response->body());
                 if($response->status){
@@ -177,7 +203,7 @@ class PeoplehubComponent extends Component
                             // pr(' m here when no username');
                             $this->_session->write($response->data->token, serialize([$headerData, $response->data->expires]));
                             // pr($this->_session->read(unserialize($response->data->token))); die;
-                        }                       
+                        }                      
                     }else{
                          $this->_session->write('token', $response);
                     }
@@ -192,8 +218,8 @@ class PeoplehubComponent extends Component
         }else{
             // pr(' m here when not expired'); die;
             $response = $token;
+            // pr($response); die;
         }
-        // pr($response); die;
         return $response;
     }
 
@@ -202,10 +228,10 @@ class PeoplehubComponent extends Component
         $this->_validateInfo($httpMethod,$resource,$subResource);
 
         if($resource == 'user'){
-            if($subResource != 'register'){
+            if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
               $response = $this->_getToken('post','user','login', false, $headerData);
               if(isset($response->status)){
-                $token = $response->data->token;               
+                $token = $response->data->token;              
               }else{
                 $token = $response;
               }
@@ -239,20 +265,20 @@ class PeoplehubComponent extends Component
         if($httpMethod == 'get'){
             if($payload){
                 // pr(' m here when payload');
-               $newurl = $url.'?'.http_build_query($payload); 
-               // pr($newurl); die;                
+               $newurl = $url.'?'.http_build_query($payload);
+               // pr($newurl); die;               
            }else{
                $newurl = $url;
            }
            $response = $http->$httpMethod($newurl, [], [
             'headers' => ['Authorization' => $token]]);
        }else{
-        if($subResource != 'register' && $subResource != 'forgot_password'){
+        if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
 
             $response = $http->$httpMethod($url, json_encode($payload), [
-                'headers' => ['Authorization' => $token]]);           
+                'headers' => ['Authorization' => $token]]);          
         }else{
-            $response = $http->$httpMethod($url, json_encode($payload)); 
+            $response = $http->$httpMethod($url, json_encode($payload));
         }
     }
     if($response->isOk()){
@@ -261,12 +287,19 @@ class PeoplehubComponent extends Component
     }else{
         $res = $response;
         $response = json_decode($response->body());
-        if(!isset($response->status)){
-            throw new Exception($response->message, $response->code); 
+        if($this->_errorMode){
+
+            if(!isset($response->status)){
+                throw new Exception($response->message, $response->code);
+            }else{
+                $response->error = json_encode($response->error);
+                throw new Exception($response->error, $res->code);
+            }        
         }else{
-            $response->error = json_encode($response->error);
-            throw new Exception($response->error, $res->code); 
-        }        
+
+            return $response;
+
+        }
     }
 }
 }

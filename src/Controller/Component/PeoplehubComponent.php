@@ -37,7 +37,7 @@ class PeoplehubComponent extends Component
 private $_resourcesWithIdentifier = [                       
 'get'=>[
 'reseller'=>['vendors', 'reseller-card-series'],
-'user' => ['me', 'activities', 'user-cards','social-validate-user'],
+'user' => ['me', 'activities', 'user-cards'],
 'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
 ],
 'put'=>[
@@ -55,7 +55,7 @@ private $_resourcesWithoutIdentifier = [
 'post' => [
 'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series'],
 
-'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password','social-login'],
+'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password','social-login-verify'],
 
 'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit']
 ]
@@ -113,18 +113,6 @@ private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=f
 
     }
     else if($resource == 'user'){
-        if($subResource == 'social-validate-user'){
-                $url = $url.'?'.http_build_query($payload);
-                $response = $http->$httpMethod($url, [], [
-                    'headers' => [
-                // 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
-                    'Referer' => Configure::read('authorizeDotNet.redirectUrl')
-                    ],
-                    'redirect'=>10
-                    ]);
-                pr($response->body());die;
-            pr($response->body());die;
-        }else{
             if(isset($headerData['username']) && isset($headerData['password'])){
                 $response = $http->$httpMethod($url, [], [
                     'headers' => ['Authorization' => 'Basic '.base64_encode($headerData['username'].':'.$headerData['password']),
@@ -141,9 +129,6 @@ private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=f
                     ]);
                 // pr($response);
             }    
-        }
-        
-
     }
         // pr($response->body()); die;
     return $response;
@@ -238,7 +223,7 @@ return $response;
 }
 
 private function _getAccessTokenForSocialLogin($headerData){
-    $url  = $this->_endpoint . "user/social-login";
+    $url  = $this->_endpoint . "user/social-login-verify";
     $http = new Client();
     $response = $http->post($url,[], [
             'headers' => ['Authorization' => $headerData ,
@@ -257,14 +242,7 @@ public function requestData($httpMethod,$resource, $subResource, $subResourceId 
     $this->_validateInfo($httpMethod,$resource,$subResource);
     if($resource == 'user'){
         if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
-            if($subResource == 'social-validate-user'){
-                $response = $this->_getToken('get','user',$subResource, false, false,$payload);
-                if(isset($response->status)){
-                    $token = $response->data->token;              
-                }else{
-                    $token = $response;
-                }      
-            }elseif($subResource == 'social-login'){
+            if($subResource == 'social-login-verify'){
                 if(isset($headerData['BasicToken']) && !empty($headerData['BasicToken'])){
                    $headerData['Authorization'] = $headerData['BasicToken'];
                    unset($headerData['BasicToken']); 
@@ -295,7 +273,7 @@ public function requestData($httpMethod,$resource, $subResource, $subResourceId 
     }
        // pr('in request data method');
        // pr($token); die;
-    if($subResource != 'token' && $subResource != 'login' && $subResource != 'social-login' ){
+    if($subResource != 'token' && $subResource != 'login' && $subResource != 'social-login-verify' ){
         $token = isset($token) ? 'Bearer '.$token : null;
         return $this->_sendRequest($token,$httpMethod,$resource, $subResource, $subResourceId, $headerData, $payload,$vendorId);
     }else{

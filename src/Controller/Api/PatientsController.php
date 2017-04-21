@@ -38,6 +38,7 @@ class PatientsController extends ApiController
     public function registerPatient(){
        $this->request->data['name'] = $this->request->data['first_name'].' '.$this->request->data['last_name'];
        $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $this->request->data);
+       $response->data->vendor_id = $this->request->data['vendor_id'];
        // pr($response); die;
        $this->_fireEvent('registerPatient', $response); 
        $this->set('response', $response);

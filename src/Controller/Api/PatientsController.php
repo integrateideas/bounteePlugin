@@ -7,6 +7,7 @@ use Cake\Core\Configure;
 use Cake\Event\Event;
 use Cake\Core\Exception\Exception;
 use Cake\Core\Exception\BadRequestException;
+use Cake\Core\Exception\InternalErrorException;
 /**
  * Patients Controller
  *
@@ -20,9 +21,9 @@ class PatientsController extends ApiController
         parent::initialize();
 
         if($this->request->header('mode')){
-            $host = Configure::read('application.livePhUrl');
+            $this->_host = $host = Configure::read('application.livePhUrl');
         }else{
-            $host = Configure::read('application.phUrl');
+            $this->_host = $host = Configure::read('application.phUrl');
         }
         $this->loadComponent('Integrateideas/Peoplehub.Peoplehub', [
         'clientId' => Configure::read('reseller.client_id'),
@@ -152,11 +153,19 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
-   public function validateSocialUser(){
-          return $this->redirect('http://localhost/peoplehub/api/user/social-validate-user?provider=Facebook&vendor_id=2');
+    public function loginSocialUser(){
+        $vendorId = $this->request->query('vendor_id');
+        $provider = $this->request->query('provider');
+        return $this->redirect($this->_host.'/api/user/social-login?provider='.$provider.'&vendor_id='.$vendorId);
     }
 
-    public function socialLogin(){
+    public function registerSocialUser(){
+        $vendorId = $this->request->query('vendor_id');
+        $provider = $this->request->query('provider');
+        return $this->redirect($this->_host.'/api/user/social-signup?provider='.$provider.'&vendor_id='.$vendorId);
+    }
+
+    public function validateSocialLogin(){
         $headerData = ['BasicToken'=>$this->request->header('Authorization')];
         $response = $this->Peoplehub->requestData('post', 'user', 'social-login-verify', false, $headerData, false);
         $response = json_decode($response);

@@ -19,20 +19,24 @@ class PatientsController extends ApiController
     public function initialize()
     {
         parent::initialize();
-
-        if($this->request->header('mode')){
-            $this->_host = $host = Configure::read('application.livePhUrl');
-        }else{
-            $this->_host = $host = Configure::read('application.phUrl');
-        }
+        $this->_getVendorEndpoints($this->request->header('mode'));        
         $this->loadComponent('Integrateideas/Peoplehub.Peoplehub', [
         'clientId' => Configure::read('reseller.client_id'),
         'clientSecret' =>Configure::read('reseller.client_secret'),
-        'apiEndPointHost' => $host,
+        'apiEndPointHost' => $this->_host,
         'liveApiEndPointHost' => Configure::read('application.livePhUrl')
       ]);
         $this->loadComponent('RequestHandler');
 
+    }
+
+    private function _getVendorEndpoints($mode){
+        
+        if($mode){
+            $this->_host = $host = Configure::read('application.livePhUrl');
+        }else{
+            $this->_host = $host = Configure::read('application.phUrl');
+        }
     }
 
 
@@ -156,12 +160,14 @@ class PatientsController extends ApiController
     public function loginSocialUser(){
         $vendorId = $this->request->query('vendor_id');
         $provider = $this->request->query('provider');
+        $this->_getVendorEndpoints($this->request->query('mode'));      
         return $this->redirect($this->_host.'/api/user/social-login?provider='.$provider.'&vendor_id='.$vendorId);
     }
 
     public function registerSocialUser(){
         $vendorId = $this->request->query('vendor_id');
         $provider = $this->request->query('provider');
+        $this->_getVendorEndpoints($this->request->query('mode'));
         return $this->redirect($this->_host.'/api/user/social-signup?provider='.$provider.'&vendor_id='.$vendorId);
     }
 

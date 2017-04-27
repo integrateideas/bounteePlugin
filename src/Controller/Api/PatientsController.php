@@ -167,8 +167,9 @@ class PatientsController extends ApiController
     public function registerSocialUser(){
         $vendorId = $this->request->query('vendor_id');
         $provider = $this->request->query('provider');
+        $card_number = $this->request->query('card_number');
         $this->_getVendorEndpoints($this->request->query('mode'));
-        return $this->redirect($this->_host.'/api/user/social-signup?provider='.$provider.'&vendor_id='.$vendorId);
+        return $this->redirect($this->_host.'/api/user/social-signup?provider='.$provider.'&vendor_id='.$vendorId.'&card_number='.$card_number);
     }
 
     public function validateSocialLogin(){

@@ -7,6 +7,7 @@ use Cake\Core\Configure;
 use Cake\Event\Event;
 use Cake\Core\Exception\Exception;
 use Cake\Core\Exception\BadRequestException;
+use Cake\Core\Exception\InternalErrorException;
 /**
  * Patients Controller
  *
@@ -18,26 +19,31 @@ class PatientsController extends ApiController
     public function initialize()
     {
         parent::initialize();
-
-        if($this->request->header('mode')){
-            $host = Configure::read('application.livePhUrl');
-        }else{
-            $host = Configure::read('application.phUrl');
-        }
+        $this->_getVendorEndpoints($this->request->header('mode'));        
         $this->loadComponent('Integrateideas/Peoplehub.Peoplehub', [
         'clientId' => Configure::read('reseller.client_id'),
         'clientSecret' =>Configure::read('reseller.client_secret'),
-        'apiEndPointHost' => $host,
+        'apiEndPointHost' => $this->_host,
         'liveApiEndPointHost' => Configure::read('application.livePhUrl')
       ]);
         $this->loadComponent('RequestHandler');
 
     }
 
+    private function _getVendorEndpoints($mode){
+        
+        if($mode){
+            $this->_host = $host = Configure::read('application.livePhUrl');
+        }else{
+            $this->_host = $host = Configure::read('application.phUrl');
+        }
+    }
+
 
     public function registerPatient(){
        $this->request->data['name'] = $this->request->data['first_name'].' '.$this->request->data['last_name'];
        $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $this->request->data);
+       $response->data->vendor_id = $this->request->data['vendor_id'];
        // pr($response); die;
        $this->_fireEvent('registerPatient', $response); 
        $this->set('response', $response);
@@ -151,11 +157,26 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
-    public function validateSocialUser($id){
-        $payload = ['vendor_id' => $id];
-        $response = $this->Peoplehub->requestData('get', 'user', 'social-validate-user', false, false, $payload);
-        pr($response);die;
-        $this->set('response', $response);
+    public function loginSocialUser(){
+        $vendorId = $this->request->query('vendor_id');
+        $provider = $this->request->query('provider');
+        $this->_getVendorEndpoints($this->request->query('mode'));      
+        return $this->redirect($this->_host.'/api/user/social-login?provider='.$provider.'&vendor_id='.$vendorId);
+    }
+
+    public function registerSocialUser(){
+        $vendorId = $this->request->query('vendor_id');
+        $provider = $this->request->query('provider');
+        $card_number = $this->request->query('card_number');
+        $this->_getVendorEndpoints($this->request->query('mode'));
+        return $this->redirect($this->_host.'/api/user/social-signup?provider='.$provider.'&vendor_id='.$vendorId.'&card_number='.$card_number);
+    }
+
+    public function validateSocialLogin(){
+        $headerData = ['BasicToken'=>$this->request->header('Authorization')];
+        $response = $this->Peoplehub->requestData('post', 'user', 'social-login-verify', false, $headerData, false);
+        $response = json_decode($response);
+        $this->set('response', $response->data);
         $this->set('_serialize', 'response');
     }
 

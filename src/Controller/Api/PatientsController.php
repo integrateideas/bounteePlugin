@@ -180,6 +180,16 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
+    public function LinkSocialAccount(){
+        $vendorId = $this->request->query('vendor_id');
+        $provider = $this->request->query('provider');
+        $token  = $this->request->query('token');
+        // pr($token); die('token here');
+        $this->_getVendorEndpoints($this->request->query('mode'));      
+        return $this->redirect($this->_host.'/api/user/social-link?provider='.$provider.'&vendor_id='.$vendorId.'&token='.$token);
+    }
+    
+
 }
 
 //(folowing api's working fine: registerPatient, loginPatient, forgotPassword)

@@ -23,283 +23,307 @@ class PeoplehubComponent extends Component
  private $_clientSecret = null;
  private $_liveEndPointUrl =null;
  private $_errorMode = null;
-    public function initialize(array $config)
-    {
-        $this->_clientId = $config['clientId'];
-        $this->_clientSecret = $config['clientSecret'];
-        $this->_endpoint = $config['apiEndPointHost']."/api/";
-        $this->_liveEndPointUrl = $config['liveApiEndPointHost']."/api/";
-        $this->_errorMode =  $config['throwErrorMode'];
-        $this->_session = new Session();
+ public function initialize(array $config)
+ {
+    $this->_clientId = $config['clientId'];
+    $this->_clientSecret = $config['clientSecret'];
+    $this->_endpoint = $config['apiEndPointHost']."/api/";
+    $this->_liveEndPointUrl = $config['liveApiEndPointHost']."/api/";
+    $this->_errorMode = ( isset($config['throwErrorMode']))?$config['throwErrorMode']:true;
+    $this->_session = new Session();
         // pr($content = $this->_session->read('data')); die;
+}
+
+private $_resourcesWithIdentifier = [                       
+'get'=>[
+'reseller'=>['vendors', 'reseller-card-series'],
+'user' => ['me', 'activities', 'user-cards'],
+'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
+],
+'put'=>[
+'reseller'=>['vendors'],
+'user' => ['switch_account', 'users'],
+'vendor'=>['users', 'vendors']
+],
+'delete'=>[
+'reseller'=>['vendors'],
+'vendor' => ['users']
+]
+];
+private $_resourcesWithoutIdentifier = [                       
+
+'post' => [
+'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series'],
+
+'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password','social-login-verify'],
+
+'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit']
+]
+];
+
+private function _validateResourceAndSubResource($httpMethod,$identifier,$resource,$subResource){
+    $attribute = $this->$identifier;
+    if(!empty($resource) && !array_key_exists($resource, $attribute[$httpMethod])){
+        throw new Exception(__("Resource Name is missing or mispelled. The available options are ".implode(", ", array_keys($attribute[$httpMethod]))));
+    }
+    if (!empty($subResource) && !in_array($subResource, $attribute[$httpMethod][$resource])) {
+        throw new Exception(__("Incorrect Subresource provided or mispelled. The available options for ".$resource." are ".implode(", ", $attribute[$httpMethod][$resource])));
+    } 
+}
+
+
+private function _validateInfo($httpMethod,$resource,$subResource){
+    if(array_key_exists($httpMethod, $this->_resourcesWithIdentifier)){
+        $this->_validateResourceAndSubResource($httpMethod,'_resourcesWithIdentifier',$resource,$subResource);
+    }else if(array_key_exists($httpMethod, $this->_resourcesWithoutIdentifier)){
+        $this->_validateResourceAndSubResource($httpMethod,'_resourcesWithoutIdentifier',$resource,$subResource);
+    }else{
+        throw new Exception(__("Request method is mispelled"));
     }
 
-    private $_resourcesWithIdentifier = [                       
-                                            'get'=>[
-                                            'reseller'=>['vendors', 'reseller-card-series'],
-                                            'user' => ['me', 'activities', 'user-cards'],
-                                            'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
-                                            ],
-                                            'put'=>[
-                                            'reseller'=>['vendors'],
-                                            'user' => ['switch_account', 'users'],
-                                            'vendor'=>['users', 'vendors']
-                                            ],
-                                            'delete'=>[
-                                            'reseller'=>['vendors'],
-                                            'vendor' => ['users']
-                                            ]
-                                        ];
-    private $_resourcesWithoutIdentifier = [                       
+}
 
-                                            'post' => [
-                                            'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series'],
-
-                                            'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'redeemedCredits','reset_password', 'fb-login'],
-
-                                            'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit']
-                                            ]
-                                          ];
-
-    private function _validateResourceAndSubResource($httpMethod,$identifier,$resource,$subResource){
-        $attribute = $this->$identifier;
-        if(!empty($resource) && !array_key_exists($resource, $attribute[$httpMethod])){
-            throw new Exception(__("Resource Name is missing or mispelled. The available options are ".implode(", ", array_keys($attribute[$httpMethod]))));
-        }
-        if (!empty($subResource) && !in_array($subResource, $attribute[$httpMethod][$resource])) {
-            throw new Exception(__("Incorrect Subresource provided or mispelled. The available options for ".$resource." are ".implode(", ", $attribute[$httpMethod][$resource])));
-        } 
+private function _createUrl($resource, $subResource, $subResourceId = false)
+{
+    if($subResource == 'add-vendor-to-live'){
+        return $this->_liveEndPointUrl . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);
+    }else{
+        return $this->_endpoint . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);   
     }
 
+}
 
-    private function _validateInfo($httpMethod,$resource,$subResource){
-        if(array_key_exists($httpMethod, $this->_resourcesWithIdentifier)){
-            $this->_validateResourceAndSubResource($httpMethod,'_resourcesWithIdentifier',$resource,$subResource);
-        }else if(array_key_exists($httpMethod, $this->_resourcesWithoutIdentifier)){
-            $this->_validateResourceAndSubResource($httpMethod,'_resourcesWithoutIdentifier',$resource,$subResource);
-        }else{
-            throw new Exception(__("Request method is mispelled"));
-        }
-
-    }
-
-    private function _createUrl($resource, $subResource, $subResourceId = false)
-    {
-        if($subResource == 'add-vendor-to-live'){
-            return $this->_liveEndPointUrl . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);
-        }else{
-            return $this->_endpoint . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);   
-        }
-       
-    }
-
-    private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=false,$headerData=false,$payload=false){
+private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=false,$headerData=false,$payload=false){
         // pr($headerData); die;
-        $httpMethod = strtolower($httpMethod);
-        $http = new Client();
-        $url = $this->_createUrl($resource, $subResource, $subResourceId = false);
+    $httpMethod = strtolower($httpMethod);
+    $http = new Client();
+    $url = $this->_createUrl($resource, $subResource, $subResourceId = false);
+    if($resource == 'reseller'){
+        $response = $http->$httpMethod($url, [], [
+            'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret),
+                //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+            'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
+            ]);
+    }else if($resource == 'vendor'){
+        $response = $http->$httpMethod($url, json_encode($payload), [
+            'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret),
+                //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+            'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
+            ]);
 
-        if($resource == 'reseller'){
-            $response = $http->$httpMethod($url, [], [
-                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret),
-                //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
-                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
-                ]);
-        }else if($resource == 'vendor'){
-            $response = $http->$httpMethod($url, json_encode($payload), [
-                'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret),
-                //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
-                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
-                ]);
-        }
-        else if($resource == 'user'){
+    }
+    else if($resource == 'user'){
             if(isset($headerData['username']) && isset($headerData['password'])){
                 $response = $http->$httpMethod($url, [], [
-                'headers' => ['Authorization' => 'Basic '.base64_encode($headerData['username'].':'.$headerData['password']),
+                    'headers' => ['Authorization' => 'Basic '.base64_encode($headerData['username'].':'.$headerData['password']),
                 // 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
-                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
-                ]);
+                    'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
+                    ]);
             }else{
 
                 // pr($headerData);
                 $response = $http->$httpMethod($url, [], [
-                'headers' => ['Authorization' => $headerData,
+                    'headers' => ['Authorization' => $headerData,
                 // 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
-                'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
-                ]);
+                    'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
+                    ]);
                 // pr($response);
-            }
-           
-        }
+            }    
+    }
         // pr($response->body()); die;
-        return $response;
-    }
+    return $response;
+}
 
 
-    private function _getToken($httpMethod,$resource,$subResource,$subResourceId=false,$headerData = false,$payload=false){
+private function _getToken($httpMethod,$resource,$subResource,$subResourceId=false,$headerData = false,$payload=false){
 
-        $isRenewRequired = false;
-        if($resource == 'user'){
-            if($this->request->header('Authorization')){
-                $token = $this->request->header('Authorization');
-                $token = str_replace('Bearer ', '', $token);
-                $readToken = unserialize($this->_session->read($token));
-                if($readToken){
+    $isRenewRequired = false;
+    if($resource == 'user'){
+        if($this->request->header('Authorization')){
+            $token = $this->request->header('Authorization');
+            $token = str_replace('Bearer ', '', $token);
+            $readToken = unserialize($this->_session->read($token));
+            if($readToken){
                    //now check if token is expired or not. if expired set $isRrenewRequired = true; 
-                   $expireToken = (isset($readToken[1]))?$readToken[1]:null;
-                   $expireTime = date("H:i:s",strtotime($expireToken));
+               $expireToken = (isset($readToken[1]))?$readToken[1]:null;
+               $expireTime = date("H:i:s",strtotime($expireToken));
                    // pr($expireTime);
-                   $currentTime = Time::now();
-                   $currentTime = date("H:i:s",strtotime($currentTime));
+               $currentTime = Time::now();
+               $currentTime = date("H:i:s",strtotime($currentTime));
                    // pr($currentTime); die;
-                   if($expireTime <= $currentTime){
-                     $headerData = $readToken[0];
-                     $isRenewRequired = true;
-                   }else{
+               if($expireTime <= $currentTime){
+                 $headerData = $readToken[0];
+                 $isRenewRequired = true;
+             }else{
                             // pr($token);
-                        $isRenewRequired = false;
-                        return $token;
-                   }
-               }
-            }else{
-                $isRenewRequired = true;
+                $isRenewRequired = false;
+                return $token;
             }
-        }else{
-            $readToken = $this->_session->read('token');
+        }
+    }else{
+        $isRenewRequired = true;
+    }
+}else{
+    $readToken = $this->_session->read('token');
             // pr($readToken); die;
-            if(!$readToken){
-                $isRenewRequired = true;
-            }else{
-                $expireToken = (isset($readToken->data->expires))?$readToken->data->expires:null;
+    if(!$readToken){
+        $isRenewRequired = true;
+    }else{
+        $expireToken = (isset($readToken->data->expires))?$readToken->data->expires:null;
                 // pr($expireToken);
-                $expireTime = date("H:i:s",strtotime($expireToken));
+        $expireTime = date("H:i:s",strtotime($expireToken));
                 // pr($expireTime);
-                $currentTime = Time::now();
-                $currentTime = date("H:i:s",strtotime($currentTime));
+        $currentTime = Time::now();
+        $currentTime = date("H:i:s",strtotime($currentTime));
                 // pr($currentTime); die;
-                if($expireTime <= $currentTime){
+        if($expireTime <= $currentTime){
                     // pr(); die;
-                    $isRenewRequired = true;
-                }else{
+            $isRenewRequired = true;
+        }else{
                     // pr(' m here'); die;
-                   $isRenewRequired = false;
-                   $token = $readToken;
+           $isRenewRequired = false;
+           $token = $readToken;
                    // pr($token);
-                   return $token; 
-                }
-            }
-        }
-        if($isRenewRequired){
+           return $token; 
+       }
+   }
+}
+if($isRenewRequired){
             // pr('is renew is true');
-            $response = $this->_renewToken($httpMethod,$resource,$subResource,$subResourceId,$headerData, $payload);
+    $response = $this->_renewToken($httpMethod,$resource,$subResource,$subResourceId,$headerData, $payload);
             // pr($response->body()); die;
-            if($response->isOk()){
-                $response = json_decode($response->body());
-                if($response->status){
-                    if($resource == 'user'){
-                        if(isset($headerData['username']) && isset($headerData['password'])){
-                            $this->_session->write($response->data->token, serialize(['Basic '.base64_encode($headerData['username'].':'.$headerData['password']), $response->data->expires]));
-                        }else{
-                            // pr(' m here when no username');
-                            $this->_session->write($response->data->token, serialize([$headerData, $response->data->expires]));
-                            // pr($this->_session->read(unserialize($response->data->token))); die;
-                        }                      
-                    }else{
-                         $this->_session->write('token', $response);
-                    }
-                }else{
-                    $err =array();
-                    $err['status']=false;
-                    $err['data']['message']='Unable to get '.$resource.' token.';
-                    $err['data']['data']=json_decode($response->body());
-                    return $err;
-                }
-            }
-        }else{
-            // pr(' m here when not expired'); die;
-            $response = $token;
-            // pr($response); die;
-        }
-        return $response;
-    }
-
-    public function requestData($httpMethod,$resource, $subResource, $subResourceId = false, $headerData = false, $payload=false,$vendorId = null)
-    {
-        $this->_validateInfo($httpMethod,$resource,$subResource);
-
-        if($resource == 'user'){
-            if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
-              $response = $this->_getToken('post','user','login', false, $headerData);
-              if(isset($response->status)){
-                $token = $response->data->token;              
-              }else{
-                $token = $response;
-              }
-            }
-        // pr($token); die;
-       }else if($resource == 'reseller'){
-            $response = $this->_getToken('post','reseller','token');
-            $token = $response->data->token;
-       }else if($resource == 'vendor'){
-            $response = $this->_getToken('post','vendor','token', false, false, ['vendor_id' => $vendorId]);
-            $token = $response->data->token;
-       }else{
-            throw new Exception("Resource name is mispelled or not found");
-
-       }
-       // pr('in request data method');
-       // pr($token); die;
-       if($subResource != 'token' && $subResource != 'login'){
-            $token = isset($token) ? 'Bearer '.$token : null;
-            return $this->_sendRequest($token,$httpMethod,$resource, $subResource, $subResourceId, $headerData, $payload,$vendorId);
-       }else{
-          return $response;
-       }
-
-    }
-
-    private function _sendRequest($token, $httpMethod,$resource, $subResource, $subResourceId, $headerData, $payload, $vendorId){
-        $httpMethod = strtolower($httpMethod);
-        $http = new Client();
-        $url = $this->_createUrl($resource, $subResource, $subResourceId);
-        if($httpMethod == 'get'){
-            if($payload){
-                // pr(' m here when payload');
-               $newurl = $url.'?'.http_build_query($payload);
-               // pr($newurl); die;               
-           }else{
-               $newurl = $url;
-           }
-           $response = $http->$httpMethod($newurl, [], [
-            'headers' => ['Authorization' => $token]]);
-       }else{
-        if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
-
-            $response = $http->$httpMethod($url, json_encode($payload), [
-                'headers' => ['Authorization' => $token]]);          
-        }else{
-            $response = $http->$httpMethod($url, json_encode($payload));
-        }
-    }
     if($response->isOk()){
         $response = json_decode($response->body());
-        return $response;
-    }else{
-        $res = $response;
-        $response = json_decode($response->body());
-        if($this->_errorMode){
-
-            if(!isset($response->status)){
-                throw new Exception($response->message, $response->code);
+        if($response->status){
+            if($resource == 'user'){
+                if(isset($headerData['username']) && isset($headerData['password'])){
+                    $this->_session->write($response->data->token, serialize(['Basic '.base64_encode($headerData['username'].':'.$headerData['password']), $response->data->expires]));
+                }else{
+                            // pr(' m here when no username');
+                    $this->_session->write($response->data->token, serialize([$headerData, $response->data->expires]));
+                            // pr($this->_session->read(unserialize($response->data->token))); die;
+                }                      
             }else{
-                $response->error = json_encode($response->error);
-                throw new Exception($response->error, $res->code);
-            }        
-        }else{
+             $this->_session->write('token', $response);
+         }
+     }else{
+        $err =array();
+        $err['status']=false;
+        $err['data']['message']='Unable to get '.$resource.' token.';
+        $err['data']['data']=json_decode($response->body());
+        return $err;
+    }
+}
+}else{
+            // pr(' m here when not expired'); die;
+    $response = $token;
+            // pr($response); die;
+}
+return $response;
+}
 
-            return $response;
+private function _getAccessTokenForSocialLogin($headerData){
+    $url  = $this->_endpoint . "user/social-login-verify";
+    $http = new Client();
+    $response = $http->post($url,[], [
+            'headers' => ['Authorization' => $headerData ,
+                //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
+            'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
+            ]);
+     if($response->isOk()){
+        return $response->body();        
+     } else {
+        throw new Exception('Failed to exchange token');
+     }
+}
+
+public function requestData($httpMethod,$resource, $subResource, $subResourceId = false, $headerData = false, $payload=false,$vendorId = null)
+{
+    $this->_validateInfo($httpMethod,$resource,$subResource);
+    if($resource == 'user'){
+        if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
+            if($subResource == 'social-login-verify'){
+                if(isset($headerData['BasicToken']) && !empty($headerData['BasicToken'])){
+                   $headerData['Authorization'] = $headerData['BasicToken'];
+                   unset($headerData['BasicToken']); 
+                }else{
+                    die('errror');
+                }
+                $response = $this->_getAccessTokenForSocialLogin($headerData['Authorization']);
+                
+            }else{
+                $response = $this->_getToken('post','user','login', false, $headerData);
+                if(isset($response->status)){
+                    $token = $response->data->token;              
+                }else{
+                    $token = $response;
+                }      
+            }
 
         }
+    }else if($resource == 'reseller'){
+        $response = $this->_getToken('post','reseller','token');
+        $token = $response->data->token;
+    }else if($resource == 'vendor'){
+        $response = $this->_getToken('post','vendor','token', false, false, ['vendor_id' => $vendorId]);
+        $token = $response->data->token;
+    }else{
+        throw new Exception("Resource name is mispelled or not found");
+
     }
+       // pr('in request data method');
+       // pr($token); die;
+    if($subResource != 'token' && $subResource != 'login' && $subResource != 'social-login-verify' ){
+        $token = isset($token) ? 'Bearer '.$token : null;
+        return $this->_sendRequest($token,$httpMethod,$resource, $subResource, $subResourceId, $headerData, $payload,$vendorId);
+    }else{
+      return $response;
+  }
+
+}
+
+private function _sendRequest($token, $httpMethod,$resource, $subResource, $subResourceId, $headerData, $payload, $vendorId){
+    $httpMethod = strtolower($httpMethod);
+    $http = new Client();
+    $url = $this->_createUrl($resource, $subResource, $subResourceId);
+    if($httpMethod == 'get'){
+        if($payload){
+                // pr(' m here when payload');
+           $newurl = $url.'?'.http_build_query($payload);
+               // pr($newurl); die;               
+       }else{
+           $newurl = $url;
+       }
+       $response = $http->$httpMethod($newurl, [], [
+        'headers' => ['Authorization' => $token]]);
+   }else{
+    if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
+
+        $response = $http->$httpMethod($url, json_encode($payload), [
+            'headers' => ['Authorization' => $token]]);          
+    }else{
+        $response = $http->$httpMethod($url, json_encode($payload));
+    }
+}
+if($response->isOk()){
+    $response = json_decode($response->body());
+    return $response;
+}else{
+    $res = $response;
+    $response = json_decode($response->body());
+    if($this->_errorMode){
+
+        if(!isset($response->status)){
+            throw new Exception($response->message, $response->code);
+        }else{
+            $response->error = json_encode($response->error);
+            throw new Exception($response->error, $res->code);
+        }        
+    }else{
+
+        return $response;
+
+    }
+}
 }
 }

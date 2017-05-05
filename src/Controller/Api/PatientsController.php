@@ -93,13 +93,25 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
-    protected function _fireEvent($name, $data){
+     protected function _fireEvent($name, $data){
         $name = 'PeoplehubPatientApi.'.$name;
         $event = new Event($name, $this, [
                 $name => $data
             ]);
         $this->eventManager()->dispatch($event);
+        if(isset($event->result)){
+            return $event->result;
+        }else{
+            return false;
+        }
         
+    }
+
+    public function viewVendor($id=null){
+        $response = $this->_fireEvent('viewVendor', ['vendor_id' =>$id]);
+        // pr($response); die;
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
 
     public function resetPassword(){
@@ -187,6 +199,13 @@ class PatientsController extends ApiController
         // pr($token); die('token here');
         $this->_getVendorEndpoints($this->request->query('mode'));      
         return $this->redirect($this->_host.'/api/user/social-link?provider='.$provider.'&vendor_id='.$vendorId.'&token='.$token);
+    }
+
+    public function unsubscribeEvent(){
+        $response = $this->request->data;
+        $response = $this->_fireEvent('unsubscribeEvent', $response);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
     
 

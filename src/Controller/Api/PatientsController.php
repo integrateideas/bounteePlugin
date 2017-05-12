@@ -63,24 +63,36 @@ class PatientsController extends ApiController
 
     public function getPatientActivities(){
         $response = $this->Peoplehub->requestData('get', 'user', 'activities',  false, $headerData);
+        if(!$response){
+            $this->logout();
+        }
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
 
     public function addPatientCard(){
         $response = $this->Peoplehub->requestData('post', 'user', 'user-cards', false, false, $this->request->data);
+        if(!$response){
+            $this->logout();
+        }
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
 
     public function getPatientCardInfo(){
         $response = $this->Peoplehub->requestData('get', 'user', 'user-cards', false);
+        if(!$response){
+            $this->logout();
+        }
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
 
     public function getPatientSpecificCardInfo($id){
         $response = $this->Peoplehub->requestData('get', 'user', 'user-cards', $id);
+        if(!$response){
+            $this->logout();
+        }
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
@@ -93,7 +105,7 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
-     protected function _fireEvent($name, $data){
+    protected function _fireEvent($name, $data){
         $name = 'PeoplehubPatientApi.'.$name;
         $event = new Event($name, $this, [
                 $name => $data
@@ -123,19 +135,29 @@ class PatientsController extends ApiController
     public function redeemedCredits(){
         $this->_fireEvent('beforeRedemption', $this->request->data);
         $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, false, $this->request->data);
+        if(!$response){
+            $this->logout();
+        }
         $this->_fireEvent('afterRedemption', $response);
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
 
     public function switchAccount(){
-        $response = $this->Peoplehub->requestData('put', 'user', 'switch_account', false, false, $this->request->data);
+        $response = $this->Peoplehub->requestData('post', 'user', 'switch_account', false, false, $this->request->data);
+        if(!$response){
+          $this->logout();
+        }
+        pr($response); die;
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
 
     public function editPatient($id){
        $response = $this->Peoplehub->requestData('put', 'user', 'users', $id, false, $this->request->data);
+       if(!$response){
+            $this->logout();
+        }
        if(isset($response->data->guardian_email) && isset($this->request->data['password'])){
          $username = $response->data->guardian_email;
          $password = $this->request->data['password'];
@@ -152,6 +174,9 @@ class PatientsController extends ApiController
     public function getPatientInfo($id){
         $payload = ['vendor_id' => $id];
         $response = $this->Peoplehub->requestData('get', 'user', 'me', false, false, $payload);
+        if(!$response){
+            $this->logout();
+        }
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }

@@ -217,6 +217,14 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
 
+    public function redeemProduct(){
+       
+       $data = $this->request->data;
+       $response = $this->_fireEvent('redeemProduct', $data); 
+       $this->set('response', $response);
+       $this->set('_serialize', 'response');
+    }
+
     public function LinkSocialAccount(){
         $vendorId = $this->request->query('vendor_id');
         $provider = $this->request->query('provider');
@@ -233,7 +241,6 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response');
     }
     
-
 }
 
 //(folowing api's working fine: registerPatient, loginPatient, forgotPassword)

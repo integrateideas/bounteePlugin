@@ -148,7 +148,6 @@ class PatientsController extends ApiController
         if(!$response){
           $this->logout();
         }
-        pr($response); die;
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }

@@ -134,11 +134,12 @@ class PatientsController extends ApiController
 
     public function redeemedCredits(){
         $this->_fireEvent('beforeRedemption', $this->request->data);
-        $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, false, $this->request->data);
+        $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, false, $this->request->data['phRedemptionData']);
         if(!$response){
             $this->logout();
         }
-        $this->_fireEvent('afterRedemption', $response);
+        $this->request->data['legacyRedemptionData']['transaction_number'] = $response->data->id;
+        $this->_fireEvent('afterRedemption', $this->request->data['legacyRedemptionData']);
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }

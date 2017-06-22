@@ -36,7 +36,7 @@ class PeoplehubComponent extends Component
 
 private $_resourcesWithIdentifier = [                       
 'get'=>[
-'reseller'=>['vendors', 'reseller-card-series'],
+'reseller'=>['vendors', 'reseller-card-series','user-search'],
 'user' => ['me', 'activities', 'user-cards'],
 'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
 ],

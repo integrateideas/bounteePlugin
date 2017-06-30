@@ -42,8 +42,8 @@ private $_resourcesWithIdentifier = [
 ],
 'put'=>[
 'reseller'=>['vendors'],
-'user' => ['users'],
-'vendor'=>['users', 'vendors']
+'user' => ['users','resend-reward'],
+'vendor'=>['users', 'vendors','resend-reward']
 ],
 'delete'=>[
 'reseller'=>['vendors'],

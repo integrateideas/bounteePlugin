@@ -240,6 +240,13 @@ class PatientsController extends ApiController
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
+
+    public function resendRewardLink(){
+        $data = $this->request->data;
+        $response = $this->Peoplehub->requestData('put', 'user', 'resend-reward', $data['transactionId'], false, false);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
     
 }
 

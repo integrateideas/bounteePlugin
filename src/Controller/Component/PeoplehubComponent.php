@@ -8,7 +8,7 @@ use Cake\Core\Configure;
 use Cake\Core\Exception\Exception;
 use Cake\Log\Log;
 use Cake\I18n\Time;
-use Cake\Network\Session;  
+use Cake\Network\Session;
 use Cake\Network\Http\Client;
 
 /**
@@ -34,23 +34,23 @@ class PeoplehubComponent extends Component
         // pr($content = $this->_session->read('data')); die;
 }
 
-private $_resourcesWithIdentifier = [                       
+private $_resourcesWithIdentifier = [
 'get'=>[
-'reseller'=>['vendors', 'reseller-card-series'],
+'reseller'=>['vendors', 'reseller-card-series','user-search','activities'],
 'user' => ['me', 'activities', 'user-cards'],
 'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
 ],
 'put'=>[
 'reseller'=>['vendors'],
-'user' => ['users'],
-'vendor'=>['users', 'vendors']
+'user' => ['users','resend-reward'],
+'vendor'=>['users', 'vendors','resend-reward']
 ],
 'delete'=>[
 'reseller'=>['vendors'],
 'vendor' => ['users']
 ]
 ];
-private $_resourcesWithoutIdentifier = [                       
+private $_resourcesWithoutIdentifier = [
 
 'post' => [
 'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series'],
@@ -68,7 +68,7 @@ private function _validateResourceAndSubResource($httpMethod,$identifier,$resour
     }
     if (!empty($subResource) && !in_array($subResource, $attribute[$httpMethod][$resource])) {
         throw new Exception(__("Incorrect Subresource provided or mispelled. The available options for ".$resource." are ".implode(", ", $attribute[$httpMethod][$resource])));
-    } 
+    }
 }
 
 
@@ -88,7 +88,7 @@ private function _createUrl($resource, $subResource, $subResourceId = false)
     if($subResource == 'add-vendor-to-live'){
         return $this->_liveEndPointUrl . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);
     }else{
-        return $this->_endpoint . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);   
+        return $this->_endpoint . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);
     }
 
 }
@@ -134,7 +134,7 @@ private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=f
                 'hashKey' => $this->request->header('r_t')]
                 ]);
                 // pr($response); die;
-        }    
+        }
     }
 
     return $response;
@@ -150,7 +150,7 @@ private function _getToken($httpMethod,$resource,$subResource,$subResourceId=fal
             $token = str_replace('Bearer ', '', $token);
             $readToken = unserialize($this->_session->read($token));
             if($readToken){
-                   //now check if token is expired or not. if expired set $isRrenewRequired = true; 
+                   //now check if token is expired or not. if expired set $isRrenewRequired = true;
              $expireToken = (isset($readToken[1]))?$readToken[1]:null;
              $expireTime = date("H:i:s",strtotime($expireToken));
                    // pr($expireTime);
@@ -188,7 +188,7 @@ private function _getToken($httpMethod,$resource,$subResource,$subResourceId=fal
         }else{
          $isRenewRequired = false;
          $token = $readToken;
-         return $token; 
+         return $token;
      }
  }
 }
@@ -207,7 +207,7 @@ if($isRenewRequired){
                             // pr(' m here when no username');
                     $this->_session->write($response->data->token, serialize([$headerData, $response->data->expires]));
                             // pr($this->_session->read(unserialize($response->data->token))); die;
-                }                      
+                }
             }else{
                $this->_session->write('token', $response);
            }
@@ -235,7 +235,7 @@ private function _getAccessTokenForSocialLogin($headerData){
         'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
         ]);
     if($response->isOk()){
-        return $response->body();        
+        return $response->body();
     } else {
         throw new Exception('Failed to exchange token');
     }
@@ -251,7 +251,7 @@ public function requestData($httpMethod,$resource, $subResource, $subResourceId 
             if($subResource == 'social-login-verify'){
                 if(isset($headerData['BasicToken']) && !empty($headerData['BasicToken'])){
                  $headerData['Authorization'] = $headerData['BasicToken'];
-                 unset($headerData['BasicToken']); 
+                 unset($headerData['BasicToken']);
              }else{
                 die('errror');
             }
@@ -267,7 +267,7 @@ public function requestData($httpMethod,$resource, $subResource, $subResourceId 
                 return false;
             }else{
                 $token = $response;
-            }   
+            }
         }
      }
     }else if($resource == 'reseller'){
@@ -300,21 +300,21 @@ private function _sendRequest($token, $httpMethod,$resource, $subResource, $subR
         if($payload){
                 // pr(' m here when payload');
          $newurl = $url.'?'.http_build_query($payload);
-               // pr($newurl); die;               
+               // pr($newurl); die;
      }else{
          $newurl = $url;
      }
      $response = $http->$httpMethod($newurl, [], [
         'headers' => ['Authorization' => $token,
-        'hashKey' => $this->request->header('r_t')                
+        'hashKey' => $this->request->header('r_t')
         ]]);
  }else{
     if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
 
         $response = $http->$httpMethod($url, json_encode($payload), [
             'headers' => ['Authorization' => $token,
-            'hashKey' => $this->request->header('r_t') 
-            ]]);          
+            'hashKey' => $this->request->header('r_t')
+            ]]);
         // die('sss');
     }else{
         $response = $http->$httpMethod($url, json_encode($payload));
@@ -334,7 +334,7 @@ if($response->isOk()){
         }else{
             $response->error = json_encode($response->error);
             throw new Exception($response->error, $res->code);
-        }        
+        }
     }else{
 
         return $response;
@@ -350,9 +350,9 @@ private function _checkRefreshToken($httpMethod, $resource, $subResource, $subRe
     // pr($url);
     $response = $http->$httpMethod($url, [], [
         'headers' => ['Authorization' => 'Bearer '.$headerData,
-        'hashKey' => $this->request->header('HashKey')                
+        'hashKey' => $this->request->header('HashKey')
         ]]);
-    if($response->isOk()){ 
+    if($response->isOk()){
         $response = json_decode($response->body());
         return $response;
     }else{

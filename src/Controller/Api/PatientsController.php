@@ -139,6 +139,7 @@ class PatientsController extends ApiController
             $this->logout();
         }
         $this->request->data['legacyRedemptionData']['transaction_number'] = $response->data->id;
+        $this->request->data['legacyRedemptionData']['points'] = $response->data->transaction->points;
         $this->_fireEvent('afterRedemption', $this->request->data['legacyRedemptionData']);
         $this->set('response', $response);
         $this->set('_serialize', 'response');

@@ -85,7 +85,7 @@ private function _validateInfo($httpMethod,$resource,$subResource){
 
 private function _createUrl($resource, $subResource, $subResourceId = false)
 {
-    if($subResource == 'add-vendor-to-live'){
+    if($subResource == 'add-vendor-to-live' || ($subResource == 'activities' && $resource=='reseller')){
         return $this->_liveEndPointUrl . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);
     }else{
         return $this->_endpoint . (($subResourceId) ? $resource."/".$subResource."/".$subResourceId  : $resource."/".$subResource);

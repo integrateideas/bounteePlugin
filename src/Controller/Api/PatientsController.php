@@ -248,6 +248,14 @@ class PatientsController extends ApiController
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
+
+    public function redeemGiftCoupon(){
+        $data = $this->request->data;
+        throw new InternalErrorException("This service is currently unavailable.");
+        // $response = $this->Peoplehub->requestData('put', 'user', 'resend-reward', $data['transactionId'], false, false);
+        // $this->set('response', $response);
+        // $this->set('_serialize', 'response');
+    }
     
 }
 

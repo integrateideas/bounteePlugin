@@ -5,9 +5,9 @@ use Integrateideas\Peoplehub\Controller\Api\ApiController;
 use Integrateideas\Peoplehub\Controller\Component;
 use Cake\Core\Configure;
 use Cake\Event\Event;
-use Cake\Core\Exception\Exception;
-use Cake\Core\Exception\BadRequestException;
-use Cake\Core\Exception\InternalErrorException;
+use Cake\Network\Exception\Exception;
+use Cake\Network\Exception\BadRequestException;
+use Cake\Network\Exception\InternalErrorException;
 /**
  * Patients Controller
  *

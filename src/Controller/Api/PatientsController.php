@@ -250,11 +250,24 @@ class PatientsController extends ApiController
     }
 
     public function redeemGiftCoupon(){
+        
+        $redemptionType = [
+            'store_credit' => 'redeemedCredits',
+            'wallet_credit' => 'UserInstantRedemptions'
+        ];
+
         $data = $this->request->data;
-        throw new InternalErrorException("This service is currently unavailable.");
-        // $response = $this->Peoplehub->requestData('put', 'user', 'resend-reward', $data['transactionId'], false, false);
-        // $this->set('response', $response);
-        // $this->set('_serialize', 'response');
+        
+        $beforeRedeemEvent = $this->_fireEvent('beforeGiftCouponRedeem', $this->request->data);
+        $response = $this->Peoplehub->requestData('post', 'user', $redemptionType[$beforeRedeemEvent['reward_type']], false, false, $beforeRedeemEvent);
+
+        $data['transaction_number'] = $response->data->id;
+        $data['redeemer_peoplehub_identifier'] = $response->data->transaction->user_id;
+        
+        $this->_fireEvent('afterGiftCouponRedeem', $data);
+        
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
     }
     
 }

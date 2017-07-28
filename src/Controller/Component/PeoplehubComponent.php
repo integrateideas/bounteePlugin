@@ -57,7 +57,7 @@ private $_resourcesWithoutIdentifier = [
 
 'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'switch_account', 'redeemedCredits','reset_password','social-login-verify', 'renewRefreshToken', 'UserInstantRedemptions'],
 
-'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit']
+'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit','lost-card']
 ]
 ];
 

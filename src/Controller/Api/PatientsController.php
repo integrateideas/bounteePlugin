@@ -172,11 +172,24 @@ class PatientsController extends ApiController
        $this->set('_serialize', 'response');
     }
 
-    public function getPatientInfo($id){
-        $payload = ['vendor_id' => $id];
+    public function getPatientInfo($vendorPeoplehubId, $vendorId){
+        
+        $payload = ['vendor_id' => $vendorPeoplehubId];
         $response = $this->Peoplehub->requestData('get', 'user', 'me', false, false, $payload);
+        
         if(!$response){
             $this->logout();
+        }
+
+        $eventData = [ 'vendor_id' => $vendorId, 'patient_id' => $response->data->id ];
+
+        $afterGetPatientInfo = $this->_fireEvent('afterGetPatientInfo', $eventData);
+        //If response of $aafterGetPatientInfo Event is an array then the keys of this array inserted into the data object of the response.
+        if($afterGetPatientInfo && is_array($afterGetPatientInfo) && !empty($afterGetPatientInfo)){
+
+            foreach ($afterGetPatientInfo as $key => $value) {
+                $response->data->$key = $value;
+            }
         }
         $this->set('response', $response);
         $this->set('_serialize', 'response');

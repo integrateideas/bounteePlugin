@@ -5,9 +5,9 @@ use Integrateideas\Peoplehub\Controller\Api\ApiController;
 use Integrateideas\Peoplehub\Controller\Component;
 use Cake\Core\Configure;
 use Cake\Event\Event;
-use Cake\Core\Exception\Exception;
-use Cake\Core\Exception\BadRequestException;
-use Cake\Core\Exception\InternalErrorException;
+use Cake\Network\Exception\Exception;
+use Cake\Network\Exception\BadRequestException;
+use Cake\Network\Exception\InternalErrorException;
 /**
  * Patients Controller
  *
@@ -134,11 +134,13 @@ class PatientsController extends ApiController
 
     public function redeemedCredits(){
         $this->_fireEvent('beforeRedemption', $this->request->data);
-        $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, false, $this->request->data);
+        $response = $this->Peoplehub->requestData('post', 'user', 'redeemedCredits', false, false, $this->request->data['phRedemptionData']);
         if(!$response){
             $this->logout();
         }
-        $this->_fireEvent('afterRedemption', $response);
+        $this->request->data['legacyRedemptionData']['transaction_number'] = $response->data->id;
+        $this->request->data['legacyRedemptionData']['points'] = $response->data->transaction->points;
+        $this->_fireEvent('afterRedemption', $this->request->data['legacyRedemptionData']);
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
@@ -170,11 +172,24 @@ class PatientsController extends ApiController
        $this->set('_serialize', 'response');
     }
 
-    public function getPatientInfo($id){
-        $payload = ['vendor_id' => $id];
+    public function getPatientInfo($vendorPeoplehubId, $vendorId){
+        
+        $payload = ['vendor_id' => $vendorPeoplehubId];
         $response = $this->Peoplehub->requestData('get', 'user', 'me', false, false, $payload);
+        
         if(!$response){
             $this->logout();
+        }
+
+        $eventData = [ 'vendor_id' => $vendorId, 'patient_id' => $response->data->id ];
+
+        $afterGetPatientInfo = $this->_fireEvent('afterGetPatientInfo', $eventData);
+        //If response of $aafterGetPatientInfo Event is an array then the keys of this array inserted into the data object of the response.
+        if($afterGetPatientInfo && is_array($afterGetPatientInfo) && !empty($afterGetPatientInfo)){
+
+            foreach ($afterGetPatientInfo as $key => $value) {
+                $response->data->$key = $value;
+            }
         }
         $this->set('response', $response);
         $this->set('_serialize', 'response');
@@ -236,6 +251,34 @@ class PatientsController extends ApiController
     public function unsubscribeEvent(){
         $response = $this->request->data;
         $response = $this->_fireEvent('unsubscribeEvent', $response);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
+
+    public function resendRewardLink(){
+        $data = $this->request->data;
+        $response = $this->Peoplehub->requestData('put', 'user', 'resend-reward', $data['transactionId'], false, false);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
+
+    public function redeemGiftCoupon(){
+        
+        $redemptionType = [
+            'store_credit' => 'redeemedCredits',
+            'wallet_credit' => 'UserInstantRedemptions'
+        ];
+
+        $data = $this->request->data;
+        
+        $beforeRedeemEvent = $this->_fireEvent('beforeGiftCouponRedeem', $this->request->data);
+        $response = $this->Peoplehub->requestData('post', 'user', $redemptionType[$beforeRedeemEvent['reward_type']], false, false, $beforeRedeemEvent);
+
+        $data['transaction_number'] = $response->data->id;
+        $data['redeemer_peoplehub_identifier'] = $response->data->transaction->user_id;
+        
+        $this->_fireEvent('afterGiftCouponRedeem', $data);
+        
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }

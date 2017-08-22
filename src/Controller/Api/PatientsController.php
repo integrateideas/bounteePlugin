@@ -57,7 +57,9 @@ class PatientsController extends ApiController
             $headerData = ['username'=> $username, 'password'=>$password];
         }
        $response = $this->Peoplehub->requestData('post', 'user', 'login', false, $headerData);
-       $response->data->vendorList = $this->_fireEvent('afterLogin',$response);
+       if(isset($response->status) && $response->status){
+            $response = $this->_fireEvent('afterLogin',$response);
+       }
        $this->set('response', $response);
        $this->set('_serialize', 'response');
     }

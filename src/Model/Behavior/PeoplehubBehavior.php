@@ -44,7 +44,9 @@ class PeoplehubBehavior extends Behavior
        $this->Peoplehub = $component->loadComponent('Integrateideas/Peoplehub.Peoplehub', [ 
         'clientId' => Configure::read('Peoplehub.clientId'),
         'clientSecret' =>Configure::read('Peoplehub.clientSecret'),
-        'userType' => Configure::read('Peoplehub.userType')
+        'userType' => Configure::read('Peoplehub.userType'),
+	'apiEndPointHost' =>Configure::read('Peoplehub.apiEndPointHost'),
+        'liveApiEndPointHost' =>Configure::read('Peoplehub.liveApiEndPointHost'),
       ]);
        $this->Model = $component->loadModel($this->_config['peopleHubObject']);
     }

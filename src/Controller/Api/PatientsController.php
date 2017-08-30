@@ -285,6 +285,13 @@ class PatientsController extends ApiController
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
+
+    public function errorReport(){
+
+        $response = $this->_fireEvent('errorReport', $this->request->data);
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');   
+    }
     
 }
 

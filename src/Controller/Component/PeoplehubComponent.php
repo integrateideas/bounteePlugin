@@ -326,6 +326,7 @@ if($response->isOk()){
     return $response;
 }else{
     $res = $response;
+    Configure::write('debug', 1);
     $response = json_decode($response->body());
     if($this->_errorMode){
 

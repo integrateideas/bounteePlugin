@@ -42,7 +42,7 @@ private $_resourcesWithIdentifier = [
 ],
 'put'=>[
 'reseller'=>['vendors'],
-'user' => ['users','resend-reward'],
+'user' => ['users','resend-reward','manage_security_questions'],
 'vendor'=>['users', 'vendors','resend-reward']
 ],
 'delete'=>[

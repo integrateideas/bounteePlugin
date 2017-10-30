@@ -313,6 +313,18 @@ class PatientsController extends ApiController
         $this->set('_serialize', 'response'); 
     }
 
+    public function manageSecurityQuestions(){
+        // pr($this->request->data); die;
+        $response = $this->Peoplehub->requestData('put', 'user', 'manage_security_questions', false, false, $this->request->data);
+        
+        if(!$response){
+            $this->logout();
+        }
+
+        $this->set('response', $response);
+        $this->set('_serialize', 'response'); 
+    }
+
     public function getSecurityQuestions(){
         $response = $this->Peoplehub->requestData('post', 'user', 'get_user_security_questions', false, false, $this->request->data);
 

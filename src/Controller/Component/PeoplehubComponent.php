@@ -37,12 +37,12 @@ class PeoplehubComponent extends Component
 private $_resourcesWithIdentifier = [
 'get'=>[
 'reseller'=>['vendors', 'reseller-card-series','user-search','activities'],
-'user' => ['me', 'activities', 'user-cards'],
+'user' => ['me', 'activities', 'user-cards', 'security_questions'],
 'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
 ],
 'put'=>[
 'reseller'=>['vendors'],
-'user' => ['users','resend-reward'],
+'user' => ['users','resend-reward','manage_security_questions'],
 'vendor'=>['users', 'vendors','resend-reward']
 ],
 'delete'=>[
@@ -55,9 +55,9 @@ private $_resourcesWithoutIdentifier = [
 'post' => [
 'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series'],
 
-'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'switch_account', 'redeemedCredits','reset_password','social-login-verify', 'renewRefreshToken', 'UserInstantRedemptions'],
+'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'switch_account', 'redeemedCredits','reset_password','social-login-verify', 'renewRefreshToken', 'UserInstantRedemptions','set_security_question', 'check_responses', 'get_user_security_questions'],
 
-'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit','lost-card']
+'vendor'=>['token', 'add-user', 'rewardCredits', 'UserInstantRedemptions', 'suggest_username', 'add-vendor-to-live', 'vendor-card-series', 'redeemedCredits', 'upload-users', 'bulk-reward','reverse-credit','lost-card','reduce-credit']
 ]
 ];
 
@@ -247,7 +247,7 @@ public function requestData($httpMethod,$resource, $subResource, $subResourceId 
     // pr($this->request->header('HashKey')); die;
     $this->_validateInfo($httpMethod,$resource,$subResource);
     if($resource == 'user'){
-        if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
+        if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password' && $subResource != 'get_user_security_questions' && $subResource != 'check_responses'){
             if($subResource == 'social-login-verify'){
                 if(isset($headerData['BasicToken']) && !empty($headerData['BasicToken'])){
                  $headerData['Authorization'] = $headerData['BasicToken'];
@@ -309,7 +309,7 @@ private function _sendRequest($token, $httpMethod,$resource, $subResource, $subR
         'hashKey' => $this->request->header('r_t')
         ]]);
  }else{
-    if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password'){
+    if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password' && $subResource != 'get_user_security_questions' && $subResource != 'check_responses'){
 
         $response = $http->$httpMethod($url, json_encode($payload), [
             'headers' => ['Authorization' => $token,

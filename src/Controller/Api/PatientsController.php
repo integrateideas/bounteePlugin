@@ -5,6 +5,7 @@ use Integrateideas\Peoplehub\Controller\Api\ApiController;
 use Integrateideas\Peoplehub\Controller\Component;
 use Cake\Core\Configure;
 use Cake\Event\Event;
+use Cake\Log\Log;
 use Cake\Network\Exception\Exception;
 use Cake\Network\Exception\BadRequestException;
 use Cake\Network\Exception\InternalErrorException;
@@ -51,17 +52,29 @@ class PatientsController extends ApiController
     }
 
     public function loginPatient($username = null, $password = null){
+        
         if(isset($this->request->data['username']) && isset($this->request->data['password'])){
             $headerData = ['username'=> $this->request->data['username'], 'password'=>$this->request->data['password']];
         }else{     
             $headerData = ['username'=> $username, 'password'=>$password];
         }
-       $response = $this->Peoplehub->requestData('post', 'user', 'login', false, $headerData);
-       if(isset($response->status) && $response->status){
+        $response = $this->Peoplehub->requestData('post', 'user', 'login', false, $headerData);
+        if(isset($response->status) && $response->status){
             $response = $this->_fireEvent('afterLogin',$response);
-       }
-       $this->set('response', $response);
-       $this->set('_serialize', 'response');
+        }
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
+
+    public function deviceToken(){
+        if(isset($this->request->data['user_device_token']) && $this->request->data['user_device_token']){
+            $data = [
+                        'user_device_token' => $this->request->data['user_device_token']
+                    ];
+            $response = $this->Peoplehub->requestData('post', 'user','set_device_token', false, false, $data);
+            $this->set('response', $response);
+            $this->set('_serialize', 'response');
+        }
     }
 
     public function getPatientActivities(){

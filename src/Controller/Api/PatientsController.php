@@ -114,10 +114,15 @@ class PatientsController extends ApiController
     }
 
    public function forgotPassword(){
-        $response = $this->Peoplehub->requestData('post', 'user', 'forgot_password', false, false, $this->request->data);
-        $response = [$this->request->data,$response];
+        $data = $this->request->data;
+        $data['ref'] = $this->_host;
+        $data = $this->_fireEvent('beforeForgotPassword',$data);
+        $response = $this->Peoplehub->requestData('post', 'user', 'forgot_password', false, false, $data);
+        $response = [$data,$response];
         $this->_fireEvent('forgotPassword',$response);
-        $this->set('response', $response);
+        $result['status'] = true;
+        $result['message'] = "Result link generated successfully."; 
+        $this->set('response', $result);
         $this->set('_serialize', 'response');
     }
 

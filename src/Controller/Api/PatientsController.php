@@ -114,6 +114,7 @@ class PatientsController extends ApiController
     }
 
    public function forgotPassword(){
+    
         $data = $this->request->data;
         $data['ref'] = $this->_host;
         $data = $this->_fireEvent('beforeForgotPassword',$data);

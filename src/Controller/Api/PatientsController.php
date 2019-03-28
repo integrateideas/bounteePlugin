@@ -194,9 +194,10 @@ class PatientsController extends ApiController
        $this->set('_serialize', 'response');
     }
 
-    public function getPatientInfo($vendorPeoplehubId, $vendorId){
+    public function getPatientInfo($vendorPeoplehubId, $vendorId , $setResponse = true){
         
         $payload = ['vendor_id' => $vendorPeoplehubId];
+        
         $response = $this->Peoplehub->requestData('get', 'user', 'me', false, false, $payload);
         
         if(!$response){
@@ -204,6 +205,11 @@ class PatientsController extends ApiController
         }
 
         $eventData = [ 'vendor_id' => $vendorId, 'patient_id' => $response->data->id ];
+
+        if(!$setResponse){
+            $eventData['patient_name'] = $response->data->name;
+            return $eventData;
+        }
 
         $afterGetPatientInfo = $this->_fireEvent('afterGetPatientInfo', $eventData);
         //If response of $aafterGetPatientInfo Event is an array then the keys of this array inserted into the data object of the response.
@@ -213,6 +219,17 @@ class PatientsController extends ApiController
                 $response->data->$key = $value;
             }
         }
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
+
+    public function updateCreditCard(){
+
+        $eventData = $this->getPatientInfo($this->request->data['vendor_peopleHub_id'],$this->request->data['vendor_id'],false);
+        $eventData['card_nonce'] = $this->request->data['card_nonce'];
+        
+        $response = $this->_fireEvent('updateCreditCard', $eventData); 
+
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }

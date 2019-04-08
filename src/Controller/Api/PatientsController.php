@@ -42,10 +42,12 @@ class PatientsController extends ApiController
 
 
     public function registerPatient(){
+
        $this->request->data['name'] = $this->request->data['first_name'].' '.$this->request->data['last_name'];
        $response = $this->Peoplehub->requestData('post', 'user', 'register', false, false, $this->request->data);
        $response->data->vendor_id = $this->request->data['vendor_id'];
-       // pr($response); die;
+       $response->original_request = $this->request->data;
+
        $this->_fireEvent('registerPatient', $response); 
        $this->set('response', $response);
        $this->set('_serialize', 'response');
@@ -116,7 +118,7 @@ class PatientsController extends ApiController
    public function forgotPassword(){
     
         $data = $this->request->data;
-        $data['ref'] = $this->_host;
+        // $data['ref'] = $this->_host;
         $data = $this->_fireEvent('beforeForgotPassword',$data);
         $response = $this->Peoplehub->requestData('post', 'user', 'forgot_password', false, false, $data);
         $response = [$data,$response];

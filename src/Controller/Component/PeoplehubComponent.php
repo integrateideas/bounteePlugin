@@ -36,7 +36,7 @@ class PeoplehubComponent extends Component
 
 private $_resourcesWithIdentifier = [
 'get'=>[
-'reseller'=>['vendors', 'reseller-card-series','user-search','activities', 'users'],
+'reseller'=>['vendors', 'reseller-card-series','user-search','activities', 'users','tango-account-info'],
 'user' => ['me', 'activities', 'user-cards', 'security_questions'],
 'vendor'=>['users', 'rewardCredits', 'user-search', 'me', 'activities', 'UserInstantRedemptions', 'vendor-card-series']
 ],
@@ -53,7 +53,7 @@ private $_resourcesWithIdentifier = [
 private $_resourcesWithoutIdentifier = [
 
 'post' => [
-'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series'],
+'reseller'=>['token', 'vendors', 'vendor-cards', 'reseller-card-series','fund-tango-account'],
 
 'user' => ['login', 'register', 'logout', 'user-cards', 'forgot_password', 'switch_account', 'redeemedCredits','reset_password','social-login-verify', 'renewRefreshToken', 'UserInstantRedemptions','set_security_question', 'check_responses', 'get_user_security_questions'],
 
@@ -321,6 +321,14 @@ private function _sendRequest($token, $httpMethod,$resource, $subResource, $subR
     }
 }
 // pr($response->body()); die;
+Log::write('debug','Response from peoplehub');
+Log::write('debug',$response);
+Log::write('debug','After response, before encoded body');
+Log::write('debug', $response->body());
+Log::write('debug','After Encoded body, before decoded body');
+Log::write('debug', json_decode($response->body()));
+Log::write('debug','After decoded body');
+
 if($response->isOk()){
     $response = json_decode($response->body());
     return $response;

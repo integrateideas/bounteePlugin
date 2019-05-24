@@ -378,6 +378,16 @@ class PatientsController extends ApiController
         $this->set('response', $response);
         $this->set('_serialize', 'response'); 
     }
+
+    public function checkCouponCode($vendorId,$couponCode){
+
+        $eventData = [ 'vendor_id' => $vendorId, 'coupon_code' => $couponCode ];
+
+        $response = $this->_fireEvent('checkCouponCode', $eventData);
+        
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
 }
 
 //(folowing api's working fine: registerPatient, loginPatient, forgotPassword)

@@ -209,7 +209,7 @@ class PatientsController extends ApiController
         $eventData = [ 'vendor_id' => $vendorId, 'patient_id' => $response->data->id ];
 
         if(!$setResponse){
-            $eventData['email'] = $response->data->email;
+            $eventData['email'] = $response->data->email ? $response->data->email : $response->data->guardian_email;
             $eventData['patient_name'] = $response->data->name;
             return $eventData;
         }

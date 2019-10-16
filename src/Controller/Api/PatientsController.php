@@ -389,6 +389,16 @@ class PatientsController extends ApiController
         $this->set('response', $response);
         $this->set('_serialize', 'response');
     }
+
+    public function savePatientAddress(){
+
+       $data = $this->request->data;
+
+       $response = $this->_fireEvent('savePatientAddress', $data); 
+
+       $this->set('response', $response);
+       $this->set('_serialize', 'response');
+    }
 }
 
 //(folowing api's working fine: registerPatient, loginPatient, forgotPassword)

@@ -103,14 +103,16 @@ private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=f
             'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret),
                 //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
             'Referer' => Configure::read('authorizeDotNet.redirectUrl'),
-            'ClientIp' => $this->request->clientIp()]
+            'ClientIp' => $this->request->clientIp()],
+            'ssl_verify_peer' => false
             ]);
     }else if($resource == 'vendor'){
         $response = $http->$httpMethod($url, json_encode($payload), [
             'headers' => ['Authorization' => 'Basic '.base64_encode($this->_clientId.':'.$this->_clientSecret),
                 //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
             'Referer' => Configure::read('authorizeDotNet.redirectUrl'),
-            'ClientIp' => $this->request->clientIp()]
+            'ClientIp' => $this->request->clientIp()],
+            'ssl_verify_peer' => false
             ]);
 
     }
@@ -121,7 +123,8 @@ private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=f
                 // 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
                 'Referer' => Configure::read('authorizeDotNet.redirectUrl'),
                 'ClientIp' => $this->request->clientIp(),
-                'hashKey' => $this->request->header('r_t')]
+                'hashKey' => $this->request->header('r_t')],
+                'ssl_verify_peer' => false
                 ]);
         }else{
 
@@ -131,7 +134,8 @@ private function _renewToken($httpMethod,$resource,$subResource,$subResourceId=f
                 // 'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
                 'Referer' => Configure::read('authorizeDotNet.redirectUrl'),
                 'ClientIp' => $this->request->clientIp(),
-                'hashKey' => $this->request->header('r_t')]
+                'hashKey' => $this->request->header('r_t')],
+                'ssl_verify_peer' => false
                 ]);
                 // pr($response); die;
         }
@@ -232,7 +236,8 @@ private function _getAccessTokenForSocialLogin($headerData){
     $response = $http->post($url,[], [
         'headers' => ['Authorization' => $headerData ,
                 //'Referer' => $this->request->env('REQUEST_SCHEME').'://'.$this->request->env('SERVER_NAME').$this->request->base
-        'Referer' => Configure::read('authorizeDotNet.redirectUrl')]
+        'Referer' => Configure::read('authorizeDotNet.redirectUrl')],
+        'ssl_verify_peer' => false
         ]);
     if($response->isOk()){
         return $response->body();
@@ -307,17 +312,19 @@ private function _sendRequest($token, $httpMethod,$resource, $subResource, $subR
      $response = $http->$httpMethod($newurl, [], [
         'headers' => ['Authorization' => $token,
         'hashKey' => $this->request->header('r_t')
-        ]]);
+        ],
+        'ssl_verify_peer' => false
+        ]);
  }else{
     if($subResource != 'register' && $subResource != 'forgot_password' && $subResource != 'reset_password' && $subResource != 'get_user_security_questions' && $subResource != 'check_responses'){
 
         $response = $http->$httpMethod($url, json_encode($payload), [
             'headers' => ['Authorization' => $token,
             'hashKey' => $this->request->header('r_t')
-            ]]);
+            ],'ssl_verify_peer' => false]);
         // die('sss');
     }else{
-        $response = $http->$httpMethod($url, json_encode($payload));
+        $response = $http->$httpMethod($url, json_encode($payload),['ssl_verify_peer' => false]);
     }
 }
 // pr($response->body()); die;
@@ -360,7 +367,7 @@ private function _checkRefreshToken($httpMethod, $resource, $subResource, $subRe
     $response = $http->$httpMethod($url, [], [
         'headers' => ['Authorization' => 'Bearer '.$headerData,
         'hashKey' => $this->request->header('HashKey')
-        ]]);
+        ],'ssl_verify_peer' => false]);
     if($response->isOk()){
         $response = json_decode($response->body());
         return $response;

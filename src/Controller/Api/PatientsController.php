@@ -399,6 +399,24 @@ class PatientsController extends ApiController
        $this->set('response', $response);
        $this->set('_serialize', 'response');
     }
+
+    public function cancelMembership(){
+        $data = $this->request->data;
+
+        $response = $this->_fireEvent('cancelMembership', $data); 
+
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
+
+    public function resetMembership(){
+        $data = $this->request->data;
+
+        $response = $this->_fireEvent('resetMembership', $data); 
+
+        $this->set('response', $response);
+        $this->set('_serialize', 'response');
+    }
 }
 
 //(folowing api's working fine: registerPatient, loginPatient, forgotPassword)
